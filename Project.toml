@@ -1,0 +1,10 @@
+name = "ConditionalDists"
+uuid = "c648c4dd-c1e0-49a6-84b9-144ae7fd2468"
+authors = ["Niklas Heim <niklas.heim@aic.fel.cvut.cz>"]
+version = "0.1.0"
+
+[deps]
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
