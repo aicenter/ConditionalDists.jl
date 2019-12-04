@@ -2,7 +2,7 @@ module ConditionalDists
 
 using Random
 using Flux
-using Zygote: @nograd
+using Flux: @nograd
 
 # functions that are overloaded by this module
 import Base.length
