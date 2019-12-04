@@ -21,7 +21,7 @@
         loss() = sum(p.σ)
         ps = params(p)
 
-        gs = Zygote.gradient(loss, ps)
+        gs = Flux.gradient(loss, ps)
         for p in ps
             @test haskey(gs, p)
         end

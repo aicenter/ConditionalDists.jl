@@ -1,5 +1,7 @@
-using Test, Suppressor, Random
-using Flux, Zygote
+using Test
+using Suppressor
+using Random
+using Flux
 
 using Revise
 using ConditionalDists
@@ -10,4 +12,5 @@ include("abstract_pdf.jl")
 include("gaussian.jl")
 include("cmean_gaussian.jl")
 include("cmeanvar_gaussian.jl")
+include("constspec_gaussian.jl")
 include("nogradarray.jl")

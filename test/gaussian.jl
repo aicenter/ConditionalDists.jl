@@ -7,7 +7,9 @@
     @test size(rand(p, 10)) == (2, 10)
     @test size(loglikelihood(p, randn(2, 10)|>gpu)) == (1, 10)
     @test size(loglikelihood(p, randn(2)|>gpu)) == (1,)
-    @test length(Flux.trainable(p)) == 2
+
+    q = Gaussian(zeros(2), ones(2)) |> gpu
+    @test length(Flux.trainable(q)) == 2
 
     msg = @capture_out show(p)
     @test occursin("Gaussian", msg)

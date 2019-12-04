@@ -1,5 +1,5 @@
-export loglikelihood, rand, xlength, zlength
-export AbstractVar, DiagVar, ScalarVar, UnitVar
+export loglikelihood, rand
+export AbstractVar, DiagVar, ScalarVar
 
 abstract type AbstractCGaussian{T} <: AbstractCPDF{T} end
 
