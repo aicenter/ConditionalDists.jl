@@ -44,3 +44,28 @@
     end
 
 end
+
+
+using Flux
+using ConditionalDists
+
+xlen = (4, 4, 1) 
+zlen = 2
+batch = 10
+T = Float32
+x = randn(T, xlen..., batch)
+p = CMeanVarGaussian{T,DiagVar}(f32(Conv((3,3), xlen[3]=>xlen[3]*2)))
+y = mean(p, x)
+
+z  = randn(T, zlen, batch) |> gpu
+x  = randn(T, xlen, batch) |> gpu
+μx = mean(p, z)
+σ2 = variance(p, z)
+@test size(μx) == (xlen, batch)
+@test size(σ2) == (xlen, batch)
+@test size(rand(p, z)) == (xlen, batch)
+@test size(loglikelihood(p, x, z)) == (1, batch)
+
+X2 = randn(4,3)
+X3 = randn(5,4,3)
+X4 = randn(5,5,4,3)

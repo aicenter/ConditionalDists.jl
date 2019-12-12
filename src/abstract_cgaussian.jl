@@ -25,3 +25,39 @@ function loglikelihood(p::AbstractCGaussian{T}, x::AbstractArray, z::AbstractArr
     y = (1 ./ σ2) .* y .+ log.(σ2) .+ T(log(2π))
     -sum(y, dims=1) / 2
 end
+
+half_split(X::AbstractArray{T,2}) where T = X[1:Int(size(X,1)/2),:], X[1+Int(size(X,1)/2):end,:]
+half_split(X::AbstractArray{T,3}) where T = X[:,1:Int(size(X,2)/2),:], X[:,1+Int(size(X,3)/2):end,:]
+half_split(X::AbstractArray{T,4}) where T = X[:,:,1:Int(size(X,3)/2),:], X[:,:,1+Int(size(X,3)/2):end,:]
+half_split(X::AbstractArray) = error("splitting  only implemented for 1<dim<4")
+
+last_split(X::AbstractArray{T,2}) where T = X[1:end-1,:], X[end:end,:]
+last_split(X::AbstractArray{T,3}) where T = X[:,1:end-1,:], X[:,end:end,:]
+last_split(X::AbstractArray{T,4}) where T = X[:,:,1:end-1,:], X[:,:,end:end,:]
+last_split(X::AbstractArray) = error("splitting  only implemented for 1<dim<4")
+
+# this is not backpropagable
+# function half_split(X::AbstractArray)
+#    # first get the dimension to be split
+#     xlen = Int(size(X, ndims(X)-1)/2)
+# 
+#     # now get the axes
+#     axs1 = axs2 = [collect(ax) for ax in axes(X)]
+#     axs1[end-1] = 1:xlen
+#     axs2[end-1] = xlen+1:xlen*2
+# 
+#     X[axs1...], X[axs2...]
+# end
+
+# function half_split2(X::AbstractArray)
+    # first get the dimension to be split
+    # nd = ndims(X)
+#     nd = length(size(X))
+#     xlen = Int(size(X, nd-1)/2)
+# 
+    # now get the axes
+#     inds1 = vcat([Colon() for _ in 1:nd-2]..., [1:xlen], Colon())
+#     inds2 = vcat([Colon() for _ in 1:nd-2]..., [xlen+1:xlen*2], Colon())
+    
+#     X[inds1...], X[inds2...]
+# end

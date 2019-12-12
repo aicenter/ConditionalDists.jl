@@ -40,9 +40,7 @@ function mean_var(p::CMeanVarGaussian{T,DiagVar}, z::AbstractArray) where T
         error("Mapping should return eltype $T. Found: $(eltype(ex))")
     end
 
-    xlen = Int(size(ex, 1) / 2)
-    μ = ex[1:xlen,:]
-    σ = ex[xlen+1:end,:]
+    μ, σ = half_split(ex)
 
     return μ, σ .* σ
 end
@@ -53,8 +51,8 @@ function mean_var(p::CMeanVarGaussian{T,ScalarVar}, z::AbstractArray) where T
         error("Mapping should return eltype $T. Found: $(eltype(ex))")
     end
 
-    μ = ex[1:end-1,:]
-    σ = ex[end:end,:] .* fill!(similar(μ, 1, size(μ,2)), 1)
+    μ, σ = last_split(ex)
+    σ = σ .* fill!(similar(μ, 1, size(μ)[2:end]...), 1)
 
     return μ, σ .* σ
 end
