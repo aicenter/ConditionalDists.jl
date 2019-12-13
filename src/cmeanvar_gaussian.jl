@@ -52,7 +52,7 @@ function mean_var(p::CMeanVarGaussian{T,ScalarVar}, z::AbstractArray) where T
     end
 
     μ, σ = last_split(ex)
-    σ = σ .* fill!(similar(μ, 1, size(μ)[2:end]...), 1)
+    σ = σ # .* fill!(similar(μ, 1, size(μ)[2:end]...), 1) # everything seems to work fine without this...
 
     return μ, σ .* σ
 end

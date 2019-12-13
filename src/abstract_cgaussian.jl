@@ -23,18 +23,22 @@ function loglikelihood(p::AbstractCGaussian{T}, x::AbstractArray, z::AbstractArr
     d = x - μ
     y = d .* d
     y = (1 ./ σ2) .* y .+ log.(σ2) .+ T(log(2π))
-    -sum(y, dims=1) / 2
+    # should we drop the extra dimensions here?
+    # the max is there for 1D arrays
+    -sum(y, dims=1:max(1, ndims(y)-1)) / 2
 end
 
+half_split(X::AbstractArray{T,1}) where T = X[1:Int(size(X,1)/2)], X[1+Int(size(X,1)/2):end]
 half_split(X::AbstractArray{T,2}) where T = X[1:Int(size(X,1)/2),:], X[1+Int(size(X,1)/2):end,:]
 half_split(X::AbstractArray{T,3}) where T = X[:,1:Int(size(X,2)/2),:], X[:,1+Int(size(X,3)/2):end,:]
 half_split(X::AbstractArray{T,4}) where T = X[:,:,1:Int(size(X,3)/2),:], X[:,:,1+Int(size(X,3)/2):end,:]
-half_split(X::AbstractArray) = error("splitting  only implemented for 1<dim<4")
+half_split(X::AbstractArray) = error("splitting  only implemented for dim<=4")
 
+last_split(X::AbstractArray{T,1}) where T = X[1:end-1], X[end:end]
 last_split(X::AbstractArray{T,2}) where T = X[1:end-1,:], X[end:end,:]
 last_split(X::AbstractArray{T,3}) where T = X[:,1:end-1,:], X[:,end:end,:]
 last_split(X::AbstractArray{T,4}) where T = X[:,:,1:end-1,:], X[:,:,end:end,:]
-last_split(X::AbstractArray) = error("splitting  only implemented for 1<dim<4")
+last_split(X::AbstractArray) = error("splitting  only implemented for dim<=4")
 
 # this is not backpropagable
 # function half_split(X::AbstractArray)
