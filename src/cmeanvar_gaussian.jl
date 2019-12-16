@@ -44,7 +44,7 @@ function mean_var(p::CMeanVarGaussian{T,DiagVar}, z::AbstractArray) where T
     μ = ex[1:xlen,:]
     σ = ex[xlen+1:end,:]
 
-    return μ, σ .* σ
+    return μ, σ .* σ .+ T(1e-6)
 end
 
 function mean_var(p::CMeanVarGaussian{T,ScalarVar}, z::AbstractArray) where T
@@ -56,7 +56,7 @@ function mean_var(p::CMeanVarGaussian{T,ScalarVar}, z::AbstractArray) where T
     μ = ex[1:end-1,:]
     σ = ex[end:end,:] .* fill!(similar(μ, 1, size(μ,2)), 1)
 
-    return μ, σ .* σ
+    return μ, σ .* σ .+ T(1e-6)
 end
 
 # make sure that parameteric constructor is called...
