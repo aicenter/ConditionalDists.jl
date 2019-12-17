@@ -54,7 +54,7 @@ function mean_var(p::CMeanVarGaussian{T,ScalarVar}, z::AbstractArray) where T
     end
 
     μ = ex[1:end-1,:]
-    σ = ex[end:end,:] .* fill!(similar(μ, 1, size(μ,2)), 1)
+    σ = ex[end:end,:]
 
     return μ, σ .* σ .+ T(1e-8)
 end
