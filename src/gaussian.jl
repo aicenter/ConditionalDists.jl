@@ -50,7 +50,7 @@ end
 
 length(p::Gaussian) = size(p.μ, 1)
 #mean_var(p::Gaussian{T}) where T = (p.μ, softplus_safe.(p.σ2, T))
-mean_var(p::Gaussian) = (p.μ, p.σ .* p.σ)
+mean_var(p::Gaussian{T}) where T = (p.μ, p.σ .* p.σ .+ T(1e-8))
 
 function rand(p::Gaussian, batchsize::Int=1)
     (μ, σ2) = mean_var(p)
