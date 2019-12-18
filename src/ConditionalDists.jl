@@ -15,7 +15,7 @@ import Statistics.mean
 include("nogradarray.jl")
 
 include("abstract_pdfs.jl")
-# include("gaussian.jl")
+include("gaussian.jl")
 include("abstract_cgaussian.jl")
 include("cmean_gaussian.jl")
 # include("cmeanvar_gaussian.jl")
