@@ -9,7 +9,7 @@
 
     mapping = Dense(zlen, xlen)
     var = NoGradArray(ones(T, xlen))
-    cpdf = CMeanGaussian{T,DiagVar}(mapping, var) |> gpu
+    cpdf = CMeanGaussian{DiagVar}(mapping, var) |> gpu
 
     p = ConstSpecGaussian(pdf, cpdf)
     z  = randn(T, zlen, batch) |> gpu

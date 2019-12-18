@@ -7,7 +7,7 @@
 
     # Test ScalarVar
     @testset "ScalarVar" begin
-        p = CMeanVarGaussian{T,ScalarVar}(f32(Dense(zlen, xlen+1))) |> gpu
+        p = CMeanVarGaussian{ScalarVar}(f32(Dense(zlen, xlen+1))) |> gpu
 
         z  = randn(T, zlen, batch) |> gpu
         μx = mean(p, z)
@@ -16,8 +16,9 @@
         @test size(μx) == (xlen, batch)
         @test size(σ2) == (1, batch)
         @test size(rand(p, z)) == (xlen, batch)
+        @test length(params(p)) == 2
 
-        x = randn(xlen, batch) |> gpu
+        x = randn(T, xlen, batch) |> gpu
         @test size(loglikelihood(p, x, z)) == (1, batch)
 
         x = randn(xlen) |> gpu
@@ -27,7 +28,7 @@
 
 
     @testset "DiagVar" begin
-        p = CMeanVarGaussian{T,DiagVar}(f32(Dense(zlen, xlen*2))) |> gpu
+        p = CMeanVarGaussian{DiagVar}(f32(Dense(zlen, xlen*2))) |> gpu
 
         z  = randn(T, zlen, batch) |> gpu
         x  = randn(T, xlen, batch) |> gpu

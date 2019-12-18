@@ -1,7 +1,8 @@
 @testset "NoGradArray" begin
     x = NoGradArray(ones(3))
-    y = ones(3)
+    @test x[1] == 1
 
+    y = ones(3)
     p = Gaussian(x, y)
     @test length(params(p)) == 1
 

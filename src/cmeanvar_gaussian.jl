@@ -2,7 +2,7 @@ export CMeanVarGaussian
 export mean_var
 
 """
-    CMeanVarGaussian{T,AbstractVar}(mapping)
+    CMeanVarGaussian{AbstractVar}(mapping)
 
 Conditional Gaussian that maps an input z to a mean μx and a variance σ2x.
 The mapping must output dimensions appropriate for the chosen variance type:
@@ -30,45 +30,39 @@ julia> rand(p, ones(2))
  0.16322285
 ```
 """
-struct CMeanVarGaussian{T,V<:AbstractVar} <: AbstractCGaussian{T}
-    mapping
+struct CMeanVarGaussian{V<:AbstractVar,M} <: AbstractCGaussian
+    mapping::M
 end
 
-function mean_var(p::CMeanVarGaussian{T,DiagVar}, z::AbstractArray) where T
-    ex = p.mapping(z)
-    if eltype(ex) != T
-        error("Mapping should return eltype $T. Found: $(eltype(ex))")
-    end
+CMeanVarGaussian{V}(m::M) where {V,M} = CMeanVarGaussian{V,M}(m)
 
+function mean_var(p::CMeanVarGaussian{DiagVar}, z::AbstractArray)
+    ex = p.mapping(z)
     xlen = Int(size(ex, 1) / 2)
     μ = ex[1:xlen,:]
     σ = ex[xlen+1:end,:]
-
+    T = eltype(ex)
     return μ, σ .* σ .+ T(1e-8)
 end
 
-function mean_var(p::CMeanVarGaussian{T,ScalarVar}, z::AbstractArray) where T
+function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
     ex = p.mapping(z)
-    if eltype(ex) != T
-        error("Mapping should return eltype $T. Found: $(eltype(ex))")
-    end
-
     μ = ex[1:end-1,:]
     σ = ex[end:end,:]
-
+    T = eltype(ex)
     return μ, σ .* σ .+ T(1e-8)
 end
 
 # make sure that parameteric constructor is called...
-function Flux.functor(p::CMeanVarGaussian{T,V}) where {T,V}
+function Flux.functor(p::CMeanVarGaussian{V,M}) where {V,M}
     fs = fieldnames(typeof(p))
     nt = (; (name=>getfield(p, name) for name in fs)...)
-    nt, y -> CMeanVarGaussian{T,V}(y...)
+    nt, y -> CMeanVarGaussian{V,M}(y...)
 end
 
-function Base.show(io::IO, p::CMeanVarGaussian{T,V}) where T where V
+function Base.show(io::IO, p::CMeanVarGaussian{V}) where V
     e = repr(p.mapping)
     e = sizeof(e)>50 ? "($(e[1:47])...)" : e
-    msg = "CMeanVarGaussian{$T,$V}(mapping=$e)"
+    msg = "CMeanVarGaussian{$V}(mapping=$e)"
     print(io, msg)
 end
