@@ -1,7 +1,7 @@
 export mean, variance, mean_var, rand, loglikelihood
 
-abstract type AbstractPDF{T<:Real} end
-abstract type AbstractCPDF{T<:Real} end
+abstract type AbstractPDF end
+abstract type AbstractCPDF end
 
 """
     mean_var(p::AbstractPDF)

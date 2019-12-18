@@ -8,7 +8,7 @@
     @testset "DiagVar" begin
         mapping = Dense(zlen, xlen)
         var = NoGradArray(ones(T, xlen))
-        p  = CMeanGaussian{T,DiagVar}(mapping, var) |> gpu
+        p  = CMeanGaussian{DiagVar}(mapping, var) |> gpu
         z  = randn(T, zlen, batch) |> gpu
         μx = mean(p, z)
         σ2 = variance(p, z)
@@ -35,7 +35,7 @@
         mapping = Dense(zlen, xlen)
         var = ones(T, 1)
 
-        p  = CMeanGaussian{T,ScalarVar}(mapping, var, xlen) |> gpu
+        p  = CMeanGaussian{ScalarVar}(mapping, var, xlen) |> gpu
         z  = randn(T, zlen, batch) |> gpu
         μx = mean(p, z)
         σ2 = variance(p, z)

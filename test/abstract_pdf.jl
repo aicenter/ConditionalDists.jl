@@ -1,9 +1,9 @@
 @testset "Abstract PDFs" begin
-    struct PDF{T<:Real} <: ConditionalDists.AbstractPDF{T} end
-    struct CPDF{T<:Real} <: ConditionalDists.AbstractCPDF{T} end
+    struct PDF <: ConditionalDists.AbstractPDF end
+    struct CPDF <: ConditionalDists.AbstractCPDF end
 
-    pdf = PDF{Float32}()
-    cpdf = CPDF{Float32}()
+    pdf = PDF()
+    cpdf = CPDF()
     x = ones(1)
 
     @test_throws ErrorException mean_var(pdf)

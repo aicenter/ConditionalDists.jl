@@ -32,29 +32,32 @@ julia> rand(p, ones(2))
  0.0767166501426535
 ```
 """
-struct CMeanGaussian{T,V<:AbstractVar} <: AbstractCGaussian{T}
-    mapping
-    σ::AbstractArray{T}
+struct CMeanGaussian{V<:AbstractVar,S<:AbstractArray,M} <: AbstractCGaussian
+    mapping::M
+    σ::S
     xlength::Int
     _nograd::Dict{Symbol,Bool}
 end
 
-function CMeanGaussian{T,V}(m, σ::AbstractArray, xlength::Int) where {T,V}
+function CMeanGaussian{V}(m::M, σ, xlength::Int) where {V,M}
     _nograd = Dict(:σ => σ isa NoGradArray)
-    σ = _nograd[:σ] ? σ.data : σ
-    CMeanGaussian{T,V}(m, σ, xlength, _nograd)
+    if _nograd[:σ]
+        σ = σ.data
+    end
+    S = typeof(σ)
+    CMeanGaussian{V,S,M}(m, σ, xlength, _nograd)
 end
 
-CMeanGaussian{T,DiagVar}(m, σ) where T = CMeanGaussian{T,DiagVar}(m, σ, size(σ,1))
+CMeanGaussian{DiagVar}(m, σ) = CMeanGaussian{DiagVar}(m, σ, size(σ,1))
 
 mean(p::CMeanGaussian, z::AbstractArray) = p.mapping(z)
 
-function variance(p::CMeanGaussian{T,DiagVar}, z::AbstractArray) where T
+function variance(p::CMeanGaussian{DiagVar}, z::AbstractArray)
     σ2 = p.σ .* p.σ
     repeat(σ2, outer=(1,size(z,2)))
 end
 
-function variance(p::CMeanGaussian{T,ScalarVar}, z::AbstractArray) where T
+function variance(p::CMeanGaussian{ScalarVar}, z::AbstractArray)
     σ2 = p.σ .* p.σ .* fill!(similar(p.σ, p.xlength), 1)
     repeat(σ2, outer=(1,size(z,2)))
 end
@@ -62,10 +65,10 @@ end
 mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), variance(p, z))
 
 # make sure that parameteric constructor is called...
-function Flux.functor(p::CMeanGaussian{T,V}) where {T,V}
+function Flux.functor(p::CMeanGaussian{V,S,M}) where {V,S,M}
     fs = fieldnames(typeof(p))
     nt = (; (name=>getfield(p, name) for name in fs)...)
-    nt, y -> CMeanGaussian{T,V}(y...)
+    nt, y -> CMeanGaussian{V,S,M}(y...)
 end
 
 function Flux.trainable(p::CMeanGaussian)
@@ -73,9 +76,9 @@ function Flux.trainable(p::CMeanGaussian)
     (p.mapping, ps...)
 end
 
-function Base.show(io::IO, p::CMeanGaussian{T}) where T
+function Base.show(io::IO, p::CMeanGaussian{V}) where V
     e = repr(p.mapping)
     e = sizeof(e)>50 ? "($(e[1:47])...)" : e
-    m = "CMeanGaussian{$T}(mapping=$e, σ2=$(summary(p.σ))"
+    m = "CMeanGaussian{$V}(mapping=$e, σ2=$(summary(p.σ))"
     print(io, m)
 end
