@@ -3,12 +3,12 @@ export const_mean, const_variance, const_mean_var
 export spec_mean, spec_variance, spec_mean_var
 export ConstSpecGaussian
 
-struct ConstSpecGaussian{T} <: AbstractCPDF{T}
-    cnst::AbstractPDF
-    spec::AbstractCPDF
+struct ConstSpecGaussian{C<:AbstractPDF,S<:AbstractCPDF} <: AbstractCPDF
+    cnst::C
+    spec::S
 end
 
-ConstSpecGaussian(c::AbstractPDF{T}, s::AbstractCPDF{T}) where T = ConstSpecGaussian{T}(c,s)
+ConstSpecGaussian(c::C, s::S) where {C,S} = ConstSpecGaussian{C,S}(c,s)
 
 Flux.@functor ConstSpecGaussian
 
