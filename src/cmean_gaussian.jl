@@ -50,12 +50,12 @@ CMeanGaussian{T,DiagVar}(m, σ) where T = CMeanGaussian{T,DiagVar}(m, σ, size(�
 mean(p::CMeanGaussian, z::AbstractArray) = p.mapping(z)
 
 function variance(p::CMeanGaussian{T,DiagVar}, z::AbstractArray) where T
-    σ2 = p.σ .* p.σ
+    σ2 = p.σ .* p.σ .+ T(1e-8)
     repeat(σ2, outer=(1,size(z,2)))
 end
 
 function variance(p::CMeanGaussian{T,ScalarVar}, z::AbstractArray) where T
-    σ2 = p.σ .* p.σ .* fill!(similar(p.σ, p.xlength), 1)
+    σ2 = p.σ .* p.σ .* fill!(similar(p.σ, p.xlength), 1) .+ T(1e-8)
     repeat(σ2, outer=(1,size(z,2)))
 end
 
