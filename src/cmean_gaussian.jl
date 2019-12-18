@@ -65,7 +65,7 @@ mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), variance(p, z))
 function Flux.functor(p::CMeanGaussian{V,S,M}) where {V,S,M}
     fs = fieldnames(typeof(p))
     nt = (; (name=>getfield(p, name) for name in fs)...)
-    nt, y -> CMeanGaussian{V,S,M}(y...)
+    nt, y -> CMeanGaussian{V,S,typeof(gpu(p.mapping))}(y...)
 end
 
 function Flux.trainable(p::CMeanGaussian)
