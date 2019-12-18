@@ -52,13 +52,13 @@ CMeanGaussian{DiagVar}(m, σ) = CMeanGaussian{DiagVar}(m, σ, size(σ,1))
 
 mean(p::CMeanGaussian, z::AbstractArray) = p.mapping(z)
 
-function variance(p::CMeanGaussian{DiagVar}, z::AbstractArray)
-    σ2 = p.σ .* p.σ
+function variance(p::CMeanGaussian{T,DiagVar}, z::AbstractArray) where T
+    σ2 = p.σ .* p.σ .+ T(1e-8)
     repeat(σ2, outer=(1,size(z,2)))
 end
 
-function variance(p::CMeanGaussian{ScalarVar}, z::AbstractArray)
-    σ2 = p.σ .* p.σ .* fill!(similar(p.σ, p.xlength), 1)
+function variance(p::CMeanGaussian{T,ScalarVar}, z::AbstractArray) where T
+    σ2 = p.σ .* p.σ .* fill!(similar(p.σ, p.xlength), 1) .+ T(1e-8)
     repeat(σ2, outer=(1,size(z,2)))
 end
 
