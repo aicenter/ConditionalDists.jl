@@ -16,6 +16,7 @@
         @test size(μx) == (xlen, batch)
         @test size(σ2) == (1, batch)
         @test size(rand(p, z)) == (xlen, batch)
+        @test length(params(p)) == 2
 
         x = randn(T, xlen, batch) |> gpu
         @test size(loglikelihood(p, x, z)) == (1, batch)
