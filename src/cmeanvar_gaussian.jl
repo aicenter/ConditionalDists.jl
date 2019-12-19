@@ -54,10 +54,10 @@ function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
 end
 
 # make sure that parameteric constructor is called...
-function Flux.functor(p::CMeanVarGaussian{V,M}) where {V,M}
+function Flux.functor(p::CMeanVarGaussian{V}) where V
     fs = fieldnames(typeof(p))
     nt = (; (name=>getfield(p, name) for name in fs)...)
-    nt, y -> CMeanVarGaussian{V,typeof(gpu(p.mapping))}(y...)
+    nt, y -> CMeanVarGaussian{V}(y...)
 end
 
 function Base.show(io::IO, p::CMeanVarGaussian{V}) where V
