@@ -57,7 +57,7 @@ end
 function Flux.functor(p::CMeanVarGaussian{V,M}) where {V,M}
     fs = fieldnames(typeof(p))
     nt = (; (name=>getfield(p, name) for name in fs)...)
-    nt, y -> CMeanVarGaussian{V,M}(y...)
+    nt, y -> CMeanVarGaussian{V,typeof(gpu(p.mapping))}(y...)
 end
 
 function Base.show(io::IO, p::CMeanVarGaussian{V}) where V
