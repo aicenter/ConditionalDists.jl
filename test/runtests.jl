@@ -2,8 +2,6 @@ using Test
 using Suppressor
 using Random
 using Flux
-
-using Revise
 using ConditionalDists
 
 if Flux.use_cuda[] using CuArrays end

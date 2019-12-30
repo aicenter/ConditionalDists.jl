@@ -1,8 +1,0 @@
-[deps]
-ConditionalDists = "c648c4dd-c1e0-49a6-84b9-144ae7fd2468"
-CuArrays = "3a865a2d-5b23-5a0f-bc46-62713ec82fae"
-Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
-Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
