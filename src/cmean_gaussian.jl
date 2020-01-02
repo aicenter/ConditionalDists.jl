@@ -62,7 +62,7 @@ end
 mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), variance(p, z))
 
 # make sure that parameteric constructor is called...
-function Flux.functor(p::CMeanGaussian{V}) where V
+function Flux.functor(p::CMeanGaussian{V,M,S}) where {V,M,S}
     fs = fieldnames(typeof(p))
     nt = (; (name=>getfield(p, name) for name in fs)...)
     nt, y -> CMeanGaussian{V}(y...)
