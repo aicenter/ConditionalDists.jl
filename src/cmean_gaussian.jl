@@ -36,6 +36,9 @@ struct CMeanGaussian{V<:AbstractVar,M,S<:AbstractArray} <: AbstractCGaussian
     _nograd::Dict{Symbol,Bool}
 end
 
+CMeanGaussian{V}(m::M, σ::S, xlength::Int, d::Dict{Symbol,Bool}) where {V,M,S} =
+    CMeanGaussian{V,M,S}(m,σ,xlength,d)
+
 function CMeanGaussian{V}(m::M, σ, xlength::Int) where {V,M}
     _nograd = Dict(:σ => σ isa NoGradArray)
     σ = _nograd[:σ] ? σ.data : σ
