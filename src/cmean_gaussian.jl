@@ -29,18 +29,21 @@ julia> rand(p, ones(2))
  0.0767166501426535
 ```
 """
-struct CMeanGaussian{V<:AbstractVar,S<:AbstractArray,M} <: AbstractCGaussian
+struct CMeanGaussian{V<:AbstractVar,M,S<:AbstractArray} <: AbstractCGaussian
     mapping::M
     σ::S
     xlength::Int
     _nograd::Dict{Symbol,Bool}
 end
 
+CMeanGaussian{V}(m::M, σ::S, xlength::Int, d::Dict{Symbol,Bool}) where {V,M,S} =
+    CMeanGaussian{V,M,S}(m,σ,xlength,d)
+
 function CMeanGaussian{V}(m::M, σ, xlength::Int) where {V,M}
     _nograd = Dict(:σ => σ isa NoGradArray)
     σ = _nograd[:σ] ? σ.data : σ
     S = typeof(σ)
-    CMeanGaussian{V,S,M}(m, σ, xlength, _nograd)
+    CMeanGaussian{V,M,S}(m, σ, xlength, _nograd)
 end
 
 CMeanGaussian{DiagVar}(m, σ) = CMeanGaussian{DiagVar}(m, σ, size(σ,1))
@@ -62,10 +65,10 @@ end
 mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), variance(p, z))
 
 # make sure that parameteric constructor is called...
-function Flux.functor(p::CMeanGaussian{V,S,M}) where {V,S,M}
+function Flux.functor(p::CMeanGaussian{V,M,S}) where {V,M,S}
     fs = fieldnames(typeof(p))
     nt = (; (name=>getfield(p, name) for name in fs)...)
-    nt, y -> CMeanGaussian{V,S,M}(y...)
+    nt, y -> CMeanGaussian{V}(y...)
 end
 
 function Flux.trainable(p::CMeanGaussian)
