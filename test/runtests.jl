@@ -4,7 +4,10 @@ using Random
 using Flux
 using ConditionalDists
 
-if Flux.use_cuda[] using CuArrays end
+if Flux.use_cuda[] 
+	using CuArrays, GPUArrays
+	GPUArrays.allowscalar(false)
+end
 
 include("abstract_pdf.jl")
 include("gaussian.jl")
