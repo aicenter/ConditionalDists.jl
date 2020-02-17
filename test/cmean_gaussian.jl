@@ -46,6 +46,12 @@
         @test size(x) == (xlen, batch)
         @test length(params(p)) == 3
         @test size(loglikelihood(p, x, z)) == (1, batch)
+
+        # test gradient
+        loss() = sum(mean(p,z) .+ variance(p,z))
+        ps = params(p)
+        gs = Flux.gradient(loss, ps)
+        for _p in ps @test all(abs.(gs[_p]) .> 0) end
     end
 
 end
