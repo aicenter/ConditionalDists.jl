@@ -53,13 +53,13 @@ mean(p::CMeanGaussian, z::AbstractArray) = p.mapping(z)
 function variance(p::CMeanGaussian{DiagVar}, z::AbstractArray)
     T = eltype(p.σ)
     σ2 = p.σ .* p.σ .+ T(1e-8)
-    repeat(σ2, outer=(1,size(z,2)))
+    σ2 * fill!(similar(σ2, 1, size(z,2)), 1)
 end
 
 function variance(p::CMeanGaussian{ScalarVar}, z::AbstractArray)
     T = eltype(p.σ)
-    σ2 = p.σ .* p.σ .* fill!(similar(p.σ, p.xlength), 1) .+ T(1e-8)
-    repeat(σ2, outer=(1,size(z,2)))
+    σ2 = p.σ .* p.σ .+ T(1e-8)
+    σ2 .* fill!(similar(p.σ, p.xlength, size(z,2)), 1)
 end
 
 mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), variance(p, z))
