@@ -1,10 +1,11 @@
 export Gaussian
-export mean_var, loglikelihood
+export mean_var
 
 """
     Gaussian{T}
 
-Gaussian defined with mean μ and variance σ2 that can be any `AbstractArray`
+Gaussian defined with mean μ and variance σ2 that can be any `AbstractArray`.
+The covariance is a diagonal matrix `Diagonal(σ2)`.
 
 # Arguments
 - `μ::AbstractArray`: mean of Gaussian
@@ -27,21 +28,22 @@ Tracked 3×1 Array{Float64,2}:
  -0.8067583329396676
 ```
 """
-struct Gaussian{M<:AbstractArray,S<:AbstractArray} <: AbstractPDF
+struct Gaussian{T<:Real,M<:AbstractVector,S<:AbstractVector} <: ContinuousMultivariateDistribution
     μ::M
     σ::S
     _nograd::Dict{Symbol,Bool}
 end
 
-function Gaussian(μ::AbstractArray, σ::AbstractArray)
+Gaussian(μ::AbstractVector{T}, σ::AbstractVector{T}, d::Dict) where T =
+    Gaussian{T,typeof(μ),typeof(σ)}(μ,σ,d)
+
+function Gaussian(μ::AbstractVector, σ::AbstractVector)
     _nograd = Dict(
         :μ => μ isa NoGradArray,
         :σ => σ isa NoGradArray)
     μ = _nograd[:μ] ? μ.data : μ
     σ = _nograd[:σ] ? σ.data : σ
-    M = typeof(μ)
-    S = typeof(σ)
-    Gaussian{M,S}(μ, σ, _nograd)
+    Gaussian(μ, σ, _nograd)
 end
 
 Flux.@functor Gaussian
@@ -51,7 +53,11 @@ function Flux.trainable(p::Gaussian)
 end
 
 length(p::Gaussian) = size(p.μ, 1)
-mean_var(p::Gaussian) = (p.μ, p.σ .* p.σ .+ eltype(p.σ)(1e-8))
+eltype(p::Gaussian) = eltype(p.μ)
+mean(p::Gaussian) = p.μ
+var(p::Gaussian) = p.σ .* p.σ .+ eltype(p)(1e-8)
+cov(p::Gaussian) = Diagonal(var(p))
+mean_var(p::Gaussian) = (mean(p), var(p))
 
 function rand(p::Gaussian, batchsize::Int=1)
     (μ, σ2) = mean_var(p)
@@ -60,13 +66,15 @@ function rand(p::Gaussian, batchsize::Int=1)
     μ .+ sqrt.(σ2) .* r
 end
 
-function loglikelihood(p::Gaussian, x::AbstractArray)
+function _logpdf(p::Gaussian{T}, x::AbstractVecOrMat{T}) where T
     (μ, σ2) = mean_var(p)
-    T = eltype(σ2)
     - (sum((x .- μ).^2 ./ σ2, dims=1) .+ sum(log.(σ2) .+ T(log(2π)))) ./ 2
 end
 
+logpdf(p::Gaussian, x::AbstractVector) = _logpdf(p,x)
+logpdf(p::Gaussian, X::AbstractMatrix) = _logpdf(p,X)
+
 function Base.show(io::IO, p::Gaussian)
-    msg = "Gaussian(μ=$(summary(mean(p))), σ2=$(summary(variance(p))))"
+    msg = "Gaussian(μ=$(summary(mean(p))), σ2=$(summary(var(p))))"
     print(io, msg)
 end
