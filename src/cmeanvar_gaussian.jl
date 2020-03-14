@@ -1,6 +1,8 @@
 export CMeanVarGaussian
 export mean_var
 
+_eltype(m) = eltype(first(Flux.params(m)))
+
 """
     CMeanVarGaussian{AbstractVar}(mapping)
 
@@ -30,11 +32,12 @@ julia> rand(p, ones(2))
  0.16322285
 ```
 """
-struct CMeanVarGaussian{V<:AbstractVar,M} <: AbstractCGaussian
+struct CMeanVarGaussian{V<:AbstractVar,T<:Real,M} <: AbstractCGaussian
     mapping::M
 end
 
-CMeanVarGaussian{V}(m::M) where {V,M} = CMeanVarGaussian{V,M}(m)
+CMeanVarGaussian{V}(m::M) where {V,M} =
+    CMeanVarGaussian{V,_eltype(m),M}(m)
 
 function mean_var(p::CMeanVarGaussian{DiagVar}, z::AbstractArray)
     ex = p.mapping(z)
@@ -52,6 +55,13 @@ function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
     T = eltype(ex)
     return μ, σ .* σ .+ T(1e-8)
 end
+
+mean(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[1]
+var(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[2]
+cov(p::CMeanVarGaussian, z::AbstractArray) = Diagonal(var(p,z))
+length(p::CMeanVarGaussian) = error("Need an exemplary input to infer `length`")
+length(p::CMeanVarGaussian, z::AbstractVector) = length(mean(p,z))
+eltype(p::CMeanVarGaussian) = _eltype(p.mapping)
 
 # make sure that parameteric constructor is called...
 function Flux.functor(p::CMeanVarGaussian{V}) where V
