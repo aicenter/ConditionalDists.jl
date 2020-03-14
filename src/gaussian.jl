@@ -13,7 +13,7 @@ The covariance is a diagonal matrix `Diagonal(σ2)`.
 
 # Example
 ```julia-repl
-julia> using Flux
+julia> using ConditionalDists
 
 julia> p = Gaussian(zeros(3), ones(3))
 Gaussian{Float64}(μ=3-element Array{Float64,1}, σ2=3-element Array{Float64,1})
@@ -66,11 +66,12 @@ function rand(p::Gaussian, batchsize::Int=1)
     μ .+ sqrt.(σ2) .* r
 end
 
-function _logpdf(p::Gaussian{T}, x::AbstractVecOrMat{T}) where T
+function _logpdf(p::Gaussian{T}, x::AbstractArray{T}) where T
     (μ, σ2) = mean_var(p)
     - (sum((x .- μ).^2 ./ σ2, dims=1) .+ sum(log.(σ2) .+ T(log(2π)))) ./ 2
 end
 
+# this is necessary to avoid method ambiguity with Distributions.jl ...
 logpdf(p::Gaussian, x::AbstractVector) = _logpdf(p,x)
 logpdf(p::Gaussian, X::AbstractMatrix) = _logpdf(p,X)
 
