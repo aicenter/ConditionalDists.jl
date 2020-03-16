@@ -34,7 +34,7 @@ struct Gaussian{T<:AbstractVector} <: ContinuousMultivariateDistribution
     _nograd::Dict{Symbol,Bool}
 end
 
-function Gaussian(μ::AbstractVector, σ::AbstractVector, d::Dict) =
+function Gaussian(μ::AbstractVector, σ::AbstractVector, d::Dict)
     Gaussian{typeof(μ)}(μ,σ,d)
 end
 
@@ -67,7 +67,8 @@ function rand(p::Gaussian, batchsize::Int=1)
     μ .+ sqrt.(σ2) .* r
 end
 
-function _logpdf(p::Gaussian{T}, x::AbstractArray{T}) where T
+function _logpdf(p::Gaussian, x::AbstractArray{T}) where T
+    @assert eltype(p) == T
     (μ, σ2) = mean_var(p)
     - (sum((x .- μ).^2 ./ σ2, dims=1) .+ sum(log.(σ2) .+ T(log(2π)))) ./ 2
 end
