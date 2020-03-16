@@ -28,7 +28,7 @@ include("nogradarray.jl")
 
 include("gaussian.jl")
 include("abstract_cgaussian.jl")
-# include("cmean_gaussian.jl")
+include("cmean_gaussian.jl")
 include("cmeanvar_gaussian.jl")
 # include("constspec_gaussian.jl")
 

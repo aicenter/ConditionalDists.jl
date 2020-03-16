@@ -1,5 +1,4 @@
 export CMeanGaussian
-export mean_var, variance
 
 """
     CMeanGaussian{AbstractVar}(mapping, σ2, xlength)
@@ -42,27 +41,37 @@ CMeanGaussian{V}(m::M, σ::S, xlength::Int, d::Dict{Symbol,Bool}) where {V,M,S} 
 function CMeanGaussian{V}(m::M, σ, xlength::Int) where {V,M}
     _nograd = Dict(:σ => σ isa NoGradArray)
     σ = _nograd[:σ] ? σ.data : σ
-    S = typeof(σ)
-    CMeanGaussian{V,M,S}(m, σ, xlength, _nograd)
+    CMeanGaussian{V}(m, σ, xlength, _nograd)
 end
 
 CMeanGaussian{DiagVar}(m, σ) = CMeanGaussian{DiagVar}(m, σ, size(σ,1))
 
 mean(p::CMeanGaussian, z::AbstractArray) = p.mapping(z)
 
-function variance(p::CMeanGaussian{DiagVar}, z::AbstractArray)
+function var(p::CMeanGaussian{DiagVar}, z::AbstractArray)
     T = eltype(p.σ)
     σ2 = p.σ .* p.σ .+ T(1e-8)
     σ2 * fill!(similar(σ2, 1, size(z,2)), 1)
 end
 
-function variance(p::CMeanGaussian{ScalarVar}, z::AbstractArray)
+function var(p::CMeanGaussian{ScalarVar}, z::AbstractArray)
     T = eltype(p.σ)
     σ2 = p.σ .* p.σ .+ T(1e-8)
     σ2 .* fill!(similar(p.σ, p.xlength, size(z,2)), 1)
 end
 
-mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), variance(p, z))
+cov(p::CMeanGaussian, z::AbstractArray) = Diagonal(var(p,z))
+mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), var(p, z))
+length(p::CMeanGaussian) = p.xlength
+
+function _eltype(m,σ)
+    T = eltype(σ)
+    @assert T == eltype(first(Flux.params(m)))
+    return T
+end
+
+eltype(p::CMeanGaussian) = _eltype(p.mapping, p.σ)
+
 
 # make sure that parameteric constructor is called...
 function Flux.functor(p::CMeanGaussian{V,M,S}) where {V,M,S}

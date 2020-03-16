@@ -28,14 +28,15 @@ Tracked 3×1 Array{Float64,2}:
  -0.8067583329396676
 ```
 """
-struct Gaussian{T<:Real,M<:AbstractVector,S<:AbstractVector} <: ContinuousMultivariateDistribution
-    μ::M
-    σ::S
+struct Gaussian{T<:AbstractVector} <: ContinuousMultivariateDistribution
+    μ::T
+    σ::T
     _nograd::Dict{Symbol,Bool}
 end
 
-Gaussian(μ::AbstractVector{T}, σ::AbstractVector{T}, d::Dict) where T =
-    Gaussian{T,typeof(μ),typeof(σ)}(μ,σ,d)
+function Gaussian(μ::AbstractVector, σ::AbstractVector, d::Dict) =
+    Gaussian{typeof(μ)}(μ,σ,d)
+end
 
 function Gaussian(μ::AbstractVector, σ::AbstractVector)
     _nograd = Dict(
