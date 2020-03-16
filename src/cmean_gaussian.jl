@@ -46,7 +46,7 @@ function CMeanGaussian{V}(m::M, σ::AbstractVector, xlength::Int) where {V,M}
 end
 
 CMeanGaussian{ScalarVar}(m::M, σ::Number, xlength::Int) where M =
-    CMeanGaussian{ScalarVar}(m, _eltype(m).([σ]), xlength)
+    CMeanGaussian{ScalarVar}(m, [σ], xlength)
 
 CMeanGaussian{DiagVar}(m, σ) = CMeanGaussian{DiagVar}(m, σ, size(σ,1))
 
