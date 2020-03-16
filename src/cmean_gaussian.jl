@@ -28,7 +28,7 @@ julia> rand(p, ones(2))
  0.0767166501426535
 ```
 """
-struct CMeanGaussian{V<:AbstractVar,M,S<:AbstractArray} <: AbstractCGaussian
+struct CMeanGaussian{V<:AbstractVar,M,S<:AbstractVector} <: AbstractCGaussian
     mapping::M
     σ::S
     xlength::Int
@@ -38,11 +38,15 @@ end
 CMeanGaussian{V}(m::M, σ::S, xlength::Int, d::Dict{Symbol,Bool}) where {V,M,S} =
     CMeanGaussian{V,M,S}(m,σ,xlength,d)
 
-function CMeanGaussian{V}(m::M, σ, xlength::Int) where {V,M}
+function CMeanGaussian{V}(m::M, σ::AbstractVector, xlength::Int) where {V,M}
+    @assert _eltype(m) == eltype(σ)
     _nograd = Dict(:σ => σ isa NoGradArray)
     σ = _nograd[:σ] ? σ.data : σ
     CMeanGaussian{V}(m, σ, xlength, _nograd)
 end
+
+CMeanGaussian{ScalarVar}(m::M, σ::Number, xlength::Int) where M =
+    CMeanGaussian{ScalarVar}(m, _eltype(m).([σ]), xlength)
 
 CMeanGaussian{DiagVar}(m, σ) = CMeanGaussian{DiagVar}(m, σ, size(σ,1))
 
@@ -63,14 +67,8 @@ end
 cov(p::CMeanGaussian, z::AbstractArray) = Diagonal(var(p,z))
 mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), var(p, z))
 length(p::CMeanGaussian) = p.xlength
-
-function _eltype(m,σ)
-    T = eltype(σ)
-    @assert T == eltype(first(Flux.params(m)))
-    return T
-end
-
-eltype(p::CMeanGaussian) = _eltype(p.mapping, p.σ)
+_eltype(m) = eltype(first(Flux.params(m)))
+eltype(p::CMeanGaussian) = _eltype(p.mapping)
 
 
 # make sure that parameteric constructor is called...
