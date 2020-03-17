@@ -3,7 +3,8 @@ export const_mean, const_var, const_mean_var
 export spec_mean, spec_var, spec_mean_var
 export ConstSpecGaussian
 
-struct ConstSpecGaussian{C<:AbstractPDF,S<:AbstractCPDF} <: AbstractCPDF
+CMD = ContinuousMultivariateDistribution
+struct ConstSpecGaussian{C<:CMD, S<:CMD} <: CMD
     cnst::C
     spec::S
 end
