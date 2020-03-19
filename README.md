@@ -3,7 +3,7 @@
 
 # ConditionalDists.jl
 
-Conditional probability distributions powered by Flux.jl.
+Conditional probability distributions powered by Flux.jl and Distributions.jl.
 
 The conditional PDFs that are defined in this package can be used in
 conjunction with Flux models to provide trainable mappings. As an example,
@@ -19,6 +19,12 @@ julia> T    = Float32;
 
 julia> cpdf = CMeanGaussian{DiagVar}(Dense(xlen, zlen), ones(T,zlen)*10)
 CMeanGaussian{DiagVar}(mapping=Dense(3, 2), σ2=2-element Array{Float32,1}
+
+julia> X = randn(T, xlen, 10);
+julia> Z = randn(T, zlen, 10);
+julia> logpdf(cpdf, X, Z)  # compute p(X|Z)
+1×10 Array{Float32,2}:
+ -6.45847  -6.47164  -6.44917  -6.46053  -6.45961  -6.45457  -6.44526  -6.4592  -6.47359  -6.45476
 
 julia> rand(cpdf, randn(T,xlen,10))  # sample from cpdf
 2×5 Array{Float32,2}:
