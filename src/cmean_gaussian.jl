@@ -39,7 +39,6 @@ CMeanGaussian{V}(m::M, σ::S, xlength::Int, d::Dict{Symbol,Bool}) where {V,M,S} 
     CMeanGaussian{V,M,S}(m,σ,xlength,d)
 
 function CMeanGaussian{V}(m::M, σ::AbstractVector, xlength::Int) where {V,M}
-    @assert _eltype(m) == eltype(σ)
     _nograd = Dict(:σ => σ isa NoGradArray)
     σ = _nograd[:σ] ? σ.data : σ
     CMeanGaussian{V}(m, σ, xlength, _nograd)
@@ -67,8 +66,7 @@ end
 cov(p::CMeanGaussian, z::AbstractArray) = Diagonal(var(p,z))
 mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), var(p, z))
 length(p::CMeanGaussian) = p.xlength
-_eltype(m) = eltype(first(Flux.params(m)))
-eltype(p::CMeanGaussian) = _eltype(p.mapping)
+eltype(p::CMeanGaussian) = eltype(p.σ)
 
 
 # make sure that parameteric constructor is called...
