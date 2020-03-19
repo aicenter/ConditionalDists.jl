@@ -53,6 +53,14 @@ function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
     return μ, σ .* σ .+ T(1e-8)
 end
 
+mean(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[1]
+var(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[2]
+cov(p::CMeanVarGaussian, z::AbstractArray) = Diagonal(var(p,z))
+length(p::CMeanVarGaussian) = error("Need an exemplary input to infer `length`")
+length(p::CMeanVarGaussian, z::AbstractVector) = length(mean(p,z))
+eltype(p::CMeanVarGaussian) = eltype(first(Flux.params(p.mapping)))
+
+
 # make sure that parameteric constructor is called...
 function Flux.functor(p::CMeanVarGaussian{V}) where V
     fs = fieldnames(typeof(p))

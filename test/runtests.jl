@@ -9,7 +9,6 @@ if Flux.use_cuda[]
 	GPUArrays.allowscalar(false)
 end
 
-include("abstract_pdf.jl")
 include("gaussian.jl")
 include("nogradarray.jl")
 include("cmeanvar_gaussian.jl")

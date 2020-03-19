@@ -1,20 +1,35 @@
 module ConditionalDists
 
 using Random
+using LinearAlgebra
+using Distributions
 using Flux
 using Flux: @nograd
 
 # functions that are overloaded by this module
 import Base.length
+import Base.eltype
 import Random.rand
 import Statistics.mean
+import Distributions.cov
+import Distributions.var
+import Distributions.logpdf
+
+abstract type AbstractConditionalDistribution end
+const CMD = ContinuousMultivariateDistribution
+const ACD = AbstractConditionalDistribution
+
+export mean
+export cov
+export var
+export rand
+export logpdf
 
 # needed to make e.g. sampling work
 @nograd similar, randn!, fill!
 
 include("nogradarray.jl")
 
-include("abstract_pdfs.jl")
 include("gaussian.jl")
 include("abstract_cgaussian.jl")
 include("cmean_gaussian.jl")
