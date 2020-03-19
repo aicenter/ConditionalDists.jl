@@ -48,7 +48,7 @@ function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
     T = eltype(p)
     ex = p.mapping(z)
     μ = ex[1:end-1,:]
-    σ = ex[end:end,:] .* ones(T, size(μ,1), 1)
+    σ = ex[end:end,:] .* fill!(similar(μ, size(μ,1), 1), 1)
     return μ, σ .* σ .+ T(1e-8)
 end
 
