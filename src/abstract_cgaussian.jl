@@ -1,6 +1,6 @@
 export AbstractVar, DiagVar, ScalarVar
 
-abstract type AbstractCGaussian <: ContinuousMultivariateDistribution end
+abstract type AbstractCGaussian <: AbstractConditionalDistribution end
 
 """Abstract variance type"""
 abstract type AbstractVar end

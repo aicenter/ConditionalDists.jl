@@ -15,6 +15,10 @@ import Distributions.cov
 import Distributions.var
 import Distributions.logpdf
 
+abstract type AbstractConditionalDistribution end
+const CMD = ContinuousMultivariateDistribution
+const ACD = AbstractConditionalDistribution
+
 export mean
 export cov
 export var
