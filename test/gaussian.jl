@@ -7,6 +7,9 @@
     @test size(rand(p, 10)) == (2, 10)
     @test size(logpdf(p, randn(2, 10)|>gpu)) == (1, 10)
     @test size(logpdf(p, randn(2)|>gpu)) == (1,)
+    @test eltype(p) == Float64
+    @test all(cov(p) * ones(2) .== σ2)
+    @test length(p) == 2
 
     q = Gaussian(zeros(2), ones(2)) |> gpu
     @test length(Flux.trainable(q)) == 2

@@ -14,6 +14,9 @@
         σ2 = var(p, z)
         x  = rand(p, z)
 
+        @test eltype(p) == T
+        @test all(cov(p,z) * ones(3) .== σ2)
+        @test length(p) == xlen
         @test size(μx) == (xlen, batch)
         @test size(σ2) == (xlen, batch)
         @test size(x) == (xlen, batch)
@@ -41,6 +44,9 @@
         σ2 = var(p, z)
         x  = rand(p, z)
 
+        @test eltype(p) == T
+        @test all(cov(p,z) * ones(3) .== σ2)
+        @test length(p) == xlen
         @test size(μx) == (xlen, batch)
         @test size(σ2) == (xlen, batch)
         @test size(x) == (xlen, batch)

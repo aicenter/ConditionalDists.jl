@@ -18,8 +18,8 @@ The mapping must output dimensions appropriate for the chosen variance type:
 
 # Example
 ```julia-repl
-julia> p = CMeanVarGaussian{Float32,ScalarVar}(Dense(2, 3))
-CMeanVarGaussian{Float32,ScalarVar}(mapping=Dense(2, 3))
+julia> p = CMeanVarGaussian{ScalarVar}(Dense(2, 3))
+CMeanVarGaussian{ScalarVar}(mapping=Dense(2, 3))
 
 julia> mean_var(p, ones(2))
 (Float32[1.6191938; -0.437356], Float32[4.131034])
@@ -46,18 +46,19 @@ function mean_var(p::CMeanVarGaussian{DiagVar}, z::AbstractArray)
 end
 
 function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+    T = eltype(p)
     ex = p.mapping(z)
     μ = ex[1:end-1,:]
-    σ = ex[end:end,:]
-    T = eltype(ex)
+    σ = ex[end:end,:] .* ones(T, size(μ,1), 1)
     return μ, σ .* σ .+ T(1e-8)
 end
 
 mean(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[1]
 var(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[2]
-cov(p::CMeanVarGaussian, z::AbstractArray) = Diagonal(var(p,z))
+cov(p::CMeanVarGaussian, z::AbstractArray) = map(Diagonal, eachcol(var(p,z)))
 length(p::CMeanVarGaussian) = error("Need an exemplary input to infer `length`")
 length(p::CMeanVarGaussian, z::AbstractVector) = length(mean(p,z))
+length(p::CMeanVarGaussian, z::AbstractMatrix) = length(mean(p,z)[:,1])
 eltype(p::CMeanVarGaussian) = eltype(first(Flux.params(p.mapping)))
 
 
