@@ -1,6 +1,3 @@
-export Gaussian
-export mean_var
-
 """
     Gaussian{T}
 

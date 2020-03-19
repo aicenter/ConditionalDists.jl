@@ -1,4 +1,3 @@
-export logpdf
 export const_mean, const_var, const_mean_var
 export spec_mean, spec_var, spec_mean_var
 export ConstSpecGaussian

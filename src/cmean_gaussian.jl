@@ -1,5 +1,3 @@
-export CMeanGaussian
-
 """
     CMeanGaussian{AbstractVar}(mapping, σ2, xlength)
 
@@ -28,12 +26,14 @@ julia> rand(p, ones(2))
  0.0767166501426535
 ```
 """
-struct CMeanGaussian{V<:AbstractVar,M,S<:AbstractVector} <: AbstractCGaussian
+struct CMeanGaussian{V<:AbstractVar,M,S<:AbstractVector} <: AbstractConditionalGaussian
     mapping::M
     σ::S
     xlength::Int
     _nograd::Dict{Symbol,Bool}
 end
+
+const CMGaussian = CMeanGaussian
 
 CMeanGaussian{V}(m::M, σ::S, xlength::Int, d::Dict{Symbol,Bool}) where {V,M,S} =
     CMeanGaussian{V,M,S}(m,σ,xlength,d)

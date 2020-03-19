@@ -1,6 +1,3 @@
-export CMeanVarGaussian
-export mean_var
-
 """
     CMeanVarGaussian{AbstractVar}(mapping)
 
@@ -30,9 +27,11 @@ julia> rand(p, ones(2))
  0.16322285
 ```
 """
-struct CMeanVarGaussian{V<:AbstractVar,M} <: AbstractCGaussian
+struct CMeanVarGaussian{V<:AbstractVar,M} <: AbstractConditionalGaussian
     mapping::M
 end
+
+const CMVGaussian = CMeanVarGaussian
 
 CMeanVarGaussian{V}(m::M) where {V,M} = CMeanVarGaussian{V,M}(m)
 
