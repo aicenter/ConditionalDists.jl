@@ -6,7 +6,7 @@
     T     = Float32
 
     for (Var, outlen) in [(ScalarVar, xlen+1), (DiagVar, xlen*2)]
-        @testset "ScalarVar" begin
+        @testset "$Var" begin
             p = CMeanVarGaussian{Var}(f32(Dense(zlen, outlen))) |> gpu
 
             z  = randn(T, zlen, batch) |> gpu
@@ -35,6 +35,13 @@
             # Test show function
             msg = summary(p)
             @test occursin("CMeanVarGaussian", msg)
+
+            if Var == ScalarVar
+                z  = randn(T, zlen, batch) |> gpu
+                σ2 = ConditionalDists.svar(p,z)
+                @test size(σ2) == (1, batch)
+                @test all(ConditionalDists.mean_svar(p,z)[2] .== σ2)
+            end
         end
     end
 end

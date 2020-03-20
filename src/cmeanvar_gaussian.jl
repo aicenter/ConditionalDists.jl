@@ -44,12 +44,17 @@ function mean_var(p::CMeanVarGaussian{DiagVar}, z::AbstractArray)
     return μ, σ .* σ .+ T(1e-8)
 end
 
-function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+function _mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
     T = eltype(p)
     ex = p.mapping(z)
     μ = ex[1:end-1,:]
-    σ = ex[end:end,:] .* fill!(similar(μ, size(μ,1), 1), 1)
+    σ = ex[end:end,:]
     return μ, σ .* σ .+ T(1e-8)
+end
+
+function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+    μ, σ2 = _mean_var(p,z)
+    return μ, σ2 .* fill!(similar(μ, size(μ,1), 1), 1)
 end
 
 mean(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[1]
@@ -60,6 +65,22 @@ length(p::CMeanVarGaussian, z::AbstractVector) = length(mean(p,z))
 length(p::CMeanVarGaussian, z::AbstractMatrix) = length(mean(p,z)[:,1])
 eltype(p::CMeanVarGaussian) = eltype(first(Flux.params(p.mapping)))
 
+
+"""
+    mean_svar(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+
+Returns mean and scalar variance.
+"""
+mean_svar(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray) = _mean_var(p,z)
+
+"""
+    svar(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+
+Returns the variance as it is actually represented in the scalar case, i.e.:
+`size(svar(p,z)) = (1,batchsize)`. The `var` function returns the scalar
+variance copied `xlength` times to create a correctly sized variance vector.
+"""
+svar(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray) = mean_svar(p,z)[2]
 
 # make sure that parameteric constructor is called...
 function Flux.functor(p::CMeanVarGaussian{V}) where V
