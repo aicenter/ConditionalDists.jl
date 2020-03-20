@@ -37,6 +37,6 @@
     @test size(logpdf(p,x,z)) == (1,batch)
 
     # Test show function
-    msg = summary(p)
+    msg = sprint(show, p)
     @test occursin("ConstSpecGaussian", msg)
 end

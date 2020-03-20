@@ -33,7 +33,7 @@
             @test size(logpdf(p, x, z)) == (1, 1)
 
             # Test show function
-            msg = summary(p)
+            msg = sprint(show, p)
             @test occursin("CMeanVarGaussian", msg)
 
             if Var == ScalarVar

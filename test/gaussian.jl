@@ -15,7 +15,7 @@
     q = Gaussian(zeros(2), ones(2)) |> gpu
     @test length(Flux.trainable(q)) == 2
 
-    msg = summary(p)
+    msg = sprint(show, p)
     @test occursin("Gaussian", msg)
 
     μ = NoGradArray(zeros(2))
