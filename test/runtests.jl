@@ -1,5 +1,4 @@
 using Test
-using Suppressor
 using Random
 using Flux
 using ConditionalDists

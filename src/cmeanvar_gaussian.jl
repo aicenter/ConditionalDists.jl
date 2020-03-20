@@ -1,6 +1,3 @@
-export CMeanVarGaussian
-export mean_var
-
 """
     CMeanVarGaussian{AbstractVar}(mapping)
 
@@ -18,8 +15,8 @@ The mapping must output dimensions appropriate for the chosen variance type:
 
 # Example
 ```julia-repl
-julia> p = CMeanVarGaussian{Float32,ScalarVar}(Dense(2, 3))
-CMeanVarGaussian{Float32,ScalarVar}(mapping=Dense(2, 3))
+julia> p = CMeanVarGaussian{ScalarVar}(Dense(2, 3))
+CMeanVarGaussian{ScalarVar}(mapping=Dense(2, 3))
 
 julia> mean_var(p, ones(2))
 (Float32[1.6191938; -0.437356], Float32[4.131034])
@@ -30,9 +27,11 @@ julia> rand(p, ones(2))
  0.16322285
 ```
 """
-struct CMeanVarGaussian{V<:AbstractVar,M} <: AbstractCGaussian
+struct CMeanVarGaussian{V<:AbstractVar,M} <: AbstractConditionalGaussian
     mapping::M
 end
+
+const CMVGaussian = CMeanVarGaussian
 
 CMeanVarGaussian{V}(m::M) where {V,M} = CMeanVarGaussian{V,M}(m)
 
@@ -45,21 +44,43 @@ function mean_var(p::CMeanVarGaussian{DiagVar}, z::AbstractArray)
     return μ, σ .* σ .+ T(1e-8)
 end
 
-function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+function _mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+    T = eltype(p)
     ex = p.mapping(z)
     μ = ex[1:end-1,:]
     σ = ex[end:end,:]
-    T = eltype(ex)
     return μ, σ .* σ .+ T(1e-8)
+end
+
+function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+    μ, σ2 = _mean_var(p,z)
+    return μ, σ2 .* fill!(similar(μ, size(μ,1), 1), 1)
 end
 
 mean(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[1]
 var(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[2]
-cov(p::CMeanVarGaussian, z::AbstractArray) = Diagonal(var(p,z))
+cov(p::CMeanVarGaussian, z::AbstractArray) = map(Diagonal, eachcol(var(p,z)))
 length(p::CMeanVarGaussian) = error("Need an exemplary input to infer `length`")
 length(p::CMeanVarGaussian, z::AbstractVector) = length(mean(p,z))
+length(p::CMeanVarGaussian, z::AbstractMatrix) = length(mean(p,z)[:,1])
 eltype(p::CMeanVarGaussian) = eltype(first(Flux.params(p.mapping)))
 
+
+"""
+    mean_svar(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+
+Returns mean and scalar variance.
+"""
+mean_svar(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray) = _mean_var(p,z)
+
+"""
+    svar(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+
+Returns the variance as it is actually represented in the scalar case, i.e.:
+`size(svar(p,z)) = (1,batchsize)`. The `var` function returns the scalar
+variance copied `xlength` times to create a correctly sized variance vector.
+"""
+svar(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray) = mean_svar(p,z)[2]
 
 # make sure that parameteric constructor is called...
 function Flux.functor(p::CMeanVarGaussian{V}) where V

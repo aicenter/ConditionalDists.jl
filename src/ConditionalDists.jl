@@ -19,9 +19,15 @@ abstract type AbstractConditionalDistribution end
 const CMD = ContinuousMultivariateDistribution
 const ACD = AbstractConditionalDistribution
 
+export Gaussian
+export CMeanGaussian, CMGaussian
+export CMeanVarGaussian, CMVGaussian
+export AbstractVar, DiagVar, ScalarVar
+
 export mean
 export cov
 export var
+export mean_var
 export rand
 export logpdf
 
