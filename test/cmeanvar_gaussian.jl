@@ -33,7 +33,7 @@
             @test size(logpdf(p, x, z)) == (1, 1)
 
             # Test show function
-            msg = @capture_out show(p)
+            msg = summary(p)
             @test occursin("CMeanVarGaussian", msg)
         end
     end

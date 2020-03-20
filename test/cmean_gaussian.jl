@@ -25,7 +25,7 @@
             @test size(logpdf(p, x, z)) == (1, batch)
 
             # Test show function
-            msg = @capture_out show(p)
+            msg = summary(p)
             @test occursin("CMeanGaussian", msg)
 
             # test gradient
