@@ -51,20 +51,23 @@ CMeanGaussian{DiagVar}(m, σ) = CMeanGaussian{DiagVar}(m, σ, size(σ,1))
 
 mean(p::CMeanGaussian, z::AbstractArray) = p.mapping(z)
 
+_var(p::CMeanGaussian, z::AbstractArray) = p.σ .* p.σ .+ eltype(p)(1e-8)
+
 function var(p::CMeanGaussian{DiagVar}, z::AbstractArray)
-    T = eltype(p.σ)
-    σ2 = p.σ .* p.σ .+ T(1e-8)
+    σ2 = _var(p,z)
     σ2 * fill!(similar(σ2, 1, size(z,2)), 1)
 end
 
 function var(p::CMeanGaussian{ScalarVar}, z::AbstractArray)
-    T = eltype(p.σ)
-    σ2 = p.σ .* p.σ .+ T(1e-8)
+    σ2 = _var(p,z)
     σ2 .* fill!(similar(p.σ, p.xlength, size(z,2)), 1)
 end
 
-cov(p::CMeanGaussian, z::AbstractArray) = Diagonal(var(p,z))
-mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p, z), var(p, z))
+svar(p::CMeanGaussian{ScalarVar}, z::AbstractArray) = _var(p,z)
+cov(p::CMeanGaussian{DiagVar}, z::AbstractArray) = map(Diagonal, eachcol(var(p,z)))
+cov(p::CMeanGaussian{ScalarVar}, z::AbstractArray) = map(s->I*s, vec(svar(p,z)))
+mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p,z), var(p,z))
+mean_cov(p::CMeanGaussian, z::AbstractArray) = (mean(p,z), cov(p,z))
 length(p::CMeanGaussian) = p.xlength
 eltype(p::CMeanGaussian) = eltype(p.σ)
 

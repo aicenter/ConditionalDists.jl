@@ -57,9 +57,22 @@ function mean_var(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
     return μ, σ2 .* fill!(similar(μ, size(μ,1), 1), 1)
 end
 
+function mean_cov(p::CMeanVarGaussian{DiagVar}, z::AbstractArray)
+    μ, σ2 = mean_var(p,z)
+    Σ = map(Diagonal, eachcol(var(p,z)))
+    return μ, Σ
+end
+
+function mean_cov(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray)
+    μ, σ2 = _mean_var(p,z)
+    Σ = map(s->s*I, vec(svar(p,z)))
+    return μ, Σ
+end
+
 mean(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[1]
 var(p::CMeanVarGaussian, z::AbstractArray) = mean_var(p,z)[2]
-cov(p::CMeanVarGaussian, z::AbstractArray) = map(Diagonal, eachcol(var(p,z)))
+cov(p::CMeanVarGaussian{DiagVar}, z::AbstractArray) = mean_cov(p,z)[2]
+cov(p::CMeanVarGaussian{ScalarVar}, z::AbstractArray) = mean_cov(p,z)[2]
 length(p::CMeanVarGaussian) = error("Need an exemplary input to infer `length`")
 length(p::CMeanVarGaussian, z::AbstractVector) = length(mean(p,z))
 length(p::CMeanVarGaussian, z::AbstractMatrix) = length(mean(p,z)[:,1])

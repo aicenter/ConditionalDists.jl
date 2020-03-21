@@ -9,20 +9,22 @@
         @testset "$Var" begin
             mapping = Dense(zlen, xlen)
             v  = NoGradArray(ones(T, xlen))
-            p  = CMeanGaussian{Var}(mapping, v, xlen) |> gpu
-            z  = randn(T, zlen, batch) |> gpu
+            p  = CMeanGaussian{Var}(mapping, v, xlen) #|> gpu
+            z  = randn(T, zlen, batch) #|> gpu
             μx = mean(p, z)
             σ2 = var(p, z)
+            Σ  = cov(p, z)
             x  = rand(p, z)
 
             @test eltype(p) == T
-            @test all(cov(p,z) * gpu(ones(T,3)) .== σ2)
+            @test all(first(cov(p,z)) * ones(T,3) .== σ2[:,1])
             @test length(p) == xlen
             @test size(μx) == (xlen, batch)
             @test size(σ2) == (xlen, batch)
             @test size(x) == (xlen, batch)
             @test length(params(p)) == 2
-            @test size(logpdf(p, x, z)) == (1, batch)
+            @show logpdf(p,x,z)
+            @test size(logpdf(p, x, z)) == (batch,)
 
             # Test show function
             msg = sprint(show, p)
