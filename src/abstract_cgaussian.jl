@@ -79,26 +79,29 @@ function rand(p::AbstractConditionalGaussian, z::AbstractArray)
     μ .+ sqrt.(σ2) .* r 
 end
 
-
-# function _logpdf(p::ACGaussian, x::AbstractArray, z::AbstractArray)
-#     (μ, σ2) = mean_var(p, z)
-#     d = x - μ
-#     y = d .* d
-#     y = (1 ./ σ2) .* y .+ log.(σ2) .+ eltype(p)(log(2π))
-#     -sum(y, dims=1) / 2
-# end
-
 _det(Σ::Diagonal, n::Int) = det(Σ)
 _det(Σ::UniformScaling{T}, n::Int) where T = det(Σ*Diagonal(ones(T,n)))
 
-function _logpdf(p::ACGaussian, x::AbstractArray, z::AbstractArray)
-    T = eltype(p)
-    (μ,Σ) = mean_cov(p,z)
+function _cov_logpdf(μ::AbstractArray, Σ::AbstractArray, x::AbstractArray, T::Type)
     n = size(μ,1)
     D  = collect(eachcol(x - μ))
     DT = [d' for d in D]
     dΣd = DT .* inv.(Σ) .* D
     -(dΣd .+ log.(_det.(Σ,n)) .+ n*T(log(2π))) / 2
+end
+
+function _var_logpdf(μ::AbstractArray, σ2::AbstractArray, x::AbstractArray, T::Type)
+    @assert eltype(x) == T
+    d = x - μ
+    y = d .* d
+    y = (1 ./ σ2) .* y .+ log.(σ2) .+ T(log(2π))
+    -sum(y, dims=1) / 2
+end
+
+function _logpdf(p::ACGaussian, x::AbstractArray, z::AbstractArray)
+    T = eltype(p)
+    (μ,σ2) = mean_var(p,z)
+    _var_logpdf(μ, σ2, x, T)
 end
 
 """

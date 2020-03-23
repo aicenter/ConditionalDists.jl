@@ -7,9 +7,9 @@
 
     for (Var, outlen) in [(ScalarVar, xlen+1), (DiagVar, xlen*2)]
         @testset "$Var" begin
-            p = CMeanVarGaussian{Var}(f32(Dense(zlen, outlen))) # |> gpu
+            p = CMeanVarGaussian{Var}(f32(Dense(zlen, outlen))) |> gpu
 
-            z  = randn(T, zlen, batch) # |> gpu
+            z  = randn(T, zlen, batch) |> gpu
             μx = mean(p, z)
             σ2 = var(p, z)
             Σ  = cov(p, z)
@@ -24,23 +24,25 @@
             @test size(rand(p, z)) == (xlen, batch)
             @test length(params(p)) == 2
 
-            x = randn(T, xlen, batch) # |> gpu
-            @test size(logpdf(p, x, z)) == (batch,)
+            x = randn(T, xlen, batch) |> gpu
+            @test size(logpdf(p, x, z)) == (1, batch)
 
-            x = randn(xlen) # |> gpu
-            z = randn(zlen) # |> gpu
-            @test size(logpdf(p, x, z)) == (1,)
+            x = randn(T, xlen) |> gpu
+            z = randn(T, zlen) |> gpu
+            @test size(logpdf(p, x, z)) == (1,1)
 
             # Test show function
             msg = sprint(show, p)
             @test occursin("CMeanVarGaussian", msg)
 
             if Var == ScalarVar
-                z  = randn(T, zlen, batch) # |> gpu
+                z  = randn(T, zlen, batch) |> gpu
                 σ2 = ConditionalDists.svar(p,z)
                 @test size(σ2) == (1, batch)
                 @test all(ConditionalDists.mean_svar(p,z)[2] .== σ2)
-                @test first(Σ) isa UniformScaling
+                if !(Flux.use_cuda[])
+                    @test first(Σ) isa UniformScaling
+                end
             else
                 @test size(first(Σ)) == (xlen, xlen)
             end

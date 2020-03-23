@@ -56,6 +56,7 @@ mean(p::Gaussian) = p.μ
 var(p::Gaussian) = p.σ .* p.σ .+ eltype(p)(1e-8)
 cov(p::Gaussian) = Diagonal(var(p))
 mean_var(p::Gaussian) = (mean(p), var(p))
+mean_cov(p::Gaussian) = (mean(p), cov(p))
 
 function rand(p::Gaussian, batchsize::Int=1)
     (μ, σ2) = mean_var(p)
@@ -64,15 +65,25 @@ function rand(p::Gaussian, batchsize::Int=1)
     μ .+ sqrt.(σ2) .* r
 end
 
-function _logpdf(p::Gaussian, x::AbstractArray{T}) where T
+function _var_logpdf(p::Gaussian, x::AbstractArray{T}) where T
     @assert eltype(p) == T
     (μ, σ2) = mean_var(p)
     - (sum((x .- μ).^2 ./ σ2, dims=1) .+ sum(log.(σ2) .+ T(log(2π)))) ./ 2
 end
 
+function _cov_logpdf(p::Gaussian, x::AbstractArray{T}) where T
+    (μ,Σ) = mean_cov(p)
+    n = size(μ,1)
+    D  = collect(eachcol(x .- μ))
+    DT = [d' for d in D]
+    #DT = map(transpose, D)
+    dΣd = DT .* inv(Σ) .* D
+    -(dΣd .+ log(_det(Σ,n)) .+ n*T(log(2π))) / 2
+end
+
 # this is necessary to avoid method ambiguity with Distributions.jl ...
-logpdf(p::Gaussian, x::AbstractVector) = _logpdf(p,x)
-logpdf(p::Gaussian, X::AbstractMatrix) = _logpdf(p,X)
+logpdf(p::Gaussian, x::AbstractVector) = _var_logpdf(p,x)
+logpdf(p::Gaussian, X::AbstractMatrix) = _var_logpdf(p,X)
 
 function Base.show(io::IO, p::Gaussian)
     msg = "Gaussian(μ=$(summary(mean(p))), σ2=$(summary(var(p))))"

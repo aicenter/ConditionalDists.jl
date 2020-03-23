@@ -5,14 +5,14 @@
     batch = 10
     T     = Float32
 
-    pdf = Gaussian(zeros(T,xlen), ones(T,xlen)) |> gpu
+    pdf = Gaussian(zeros(T,xlen), ones(T,xlen)) #|> gpu
 
     mapping = Dense(zlen, xlen)
     v = NoGradArray(ones(T, xlen))
-    cpdf = CMeanGaussian{DiagVar}(mapping, v) |> gpu
+    cpdf = CMeanGaussian{DiagVar}(mapping, v) #|> gpu
 
     p = ConstSpecGaussian(pdf, cpdf)
-    z  = randn(T, zlen, batch) |> gpu
+    z  = randn(T, zlen, batch) #|> gpu
 
     μc = const_mean(p)
     σc = const_var(p)
