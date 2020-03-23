@@ -24,6 +24,11 @@
             @test size(rand(p, z)) == (xlen, batch)
             @test length(params(p)) == 2
 
+            # covariance test
+            # _σ2 = Σ .* collect(eachcol(ones(T,xlen,batch)|>gpu))
+            # _σ2 = hcat(_σ2...)
+            #@test all(_σ2 .== σ2)
+
             x = randn(T, xlen, batch) |> gpu
             @test size(logpdf(p, x, z)) == (1, batch)
 
@@ -46,6 +51,13 @@
             else
                 @test size(first(Σ)) == (xlen, xlen)
             end
+
+            x = randn(T, xlen, batch) |> gpu
+            z = randn(T, zlen, batch) |> gpu
+            loss() = sum(logpdf(p,x,z))
+            ps = params(p)
+            gs = Flux.gradient(loss, ps)
+            for _p in ps @test all(abs.(gs[_p]) .> 0) end
         end
     end
 end
