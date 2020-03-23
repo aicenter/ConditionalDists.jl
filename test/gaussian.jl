@@ -21,4 +21,13 @@
     μ = NoGradArray(zeros(2))
     p = Gaussian(μ, ones(2))
     @test length(Flux.trainable(p)) == 1
+
+    # test gradient
+    p = Gaussian(μ, ones(2)) |> gpu
+    x = randn(2, 10) |> gpu
+    loss() = sum(logpdf(p,x))
+    ps = params(p)
+    gs = Flux.gradient(loss, ps)
+    for _p in ps @test all(abs.(gs[_p]) .> 0) end
+
 end

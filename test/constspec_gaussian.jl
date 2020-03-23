@@ -11,8 +11,8 @@
     v = NoGradArray(ones(T, xlen))
     cpdf = CMeanGaussian{DiagVar}(mapping, v) #|> gpu
 
-    p = ConstSpecGaussian(pdf, cpdf)
-    z  = randn(T, zlen, batch) #|> gpu
+    p = ConstSpecGaussian(pdf, cpdf) |> gpu
+    z  = randn(T, zlen, batch) |> gpu
 
     μc = const_mean(p)
     σc = const_var(p)
@@ -39,4 +39,12 @@
     # Test show function
     msg = sprint(show, p)
     @test occursin("ConstSpecGaussian", msg)
+
+    # test gradient
+    x = randn(T, xlen, batch) |> gpu
+    z = randn(T, zlen, batch) |> gpu
+    loss() = sum(logpdf(p,x,z))
+    ps = params(p)
+    gs = Flux.gradient(loss, ps)
+    for _p in ps @test all(abs.(gs[_p]) .> 0) end
 end
