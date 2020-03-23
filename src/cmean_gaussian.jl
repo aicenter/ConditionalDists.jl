@@ -63,7 +63,11 @@ function var(p::CMeanGaussian{ScalarVar}, z::AbstractArray)
     σ2 .* fill!(similar(p.σ, p.xlength, size(z,2)), 1)
 end
 
-svar(p::CMeanGaussian{ScalarVar}, z::AbstractArray) = _var(p,z)
+function svar(p::CMeanGaussian{ScalarVar}, z::AbstractArray)
+    σ2 = _var(p,z)
+    σ2 * fill!(similar(p.σ, 1, size(z,2)), 1)
+end
+
 cov(p::CMeanGaussian{DiagVar}, z::AbstractArray) = map(Diagonal, eachcol(var(p,z)))
 cov(p::CMeanGaussian{ScalarVar}, z::AbstractArray) = map(s->I*s, vec(svar(p,z)))
 mean_var(p::CMeanGaussian, z::AbstractArray) = (mean(p,z), var(p,z))

@@ -5,10 +5,10 @@
     batch = 10
     T     = Float32
 
-    for Var in [ScalarVar, DiagVar]
+    for (Var, vlen) in [(ScalarVar, 1), (DiagVar, xlen)]
         @testset "$Var" begin
             mapping = Dense(zlen, xlen)
-            v  = NoGradArray(ones(T, xlen))
+            v  = NoGradArray(ones(T, vlen))
             p  = CMeanGaussian{Var}(mapping, v, xlen) #|> gpu
             z  = randn(T, zlen, batch) #|> gpu
             μx = mean(p, z)
@@ -23,7 +23,6 @@
             @test size(σ2) == (xlen, batch)
             @test size(x) == (xlen, batch)
             @test length(params(p)) == 2
-            @show logpdf(p,x,z)
             @test size(logpdf(p, x, z)) == (batch,)
 
             # Test show function
