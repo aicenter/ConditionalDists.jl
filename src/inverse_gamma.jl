@@ -1,14 +1,7 @@
-struct InverseWishart{P<:AbstractMatrix, V<:AbstractVector} <: CMD
+struct InverseWishart{P<:AbstractPDMat{T}, V<:AbstractVector{T}} where {T<:Real} <: CMD
     ψ::P
     v::V
     _nograd::Dict{Symbol,Bool}
-end
-
-function checkeltype(ψ::AbstractArray, v::AbstractArray)
-    T = eltype(ψ)
-    V = eltype(v)
-    T == V || throw(ArgumentError("Both arrays must have same eltype"))
-    return T
 end
 
 function checknu(v::AbstractVector)
@@ -17,10 +10,7 @@ function checknu(v::AbstractVector)
 end
 
 function InverseWishart(ψ::AbstractMatrix, v::AbstractVector)
-    LinearAlgebra.checksquare(ψ)
-    LinearAlgebra.checkpositivedefinite(ψ)
     checknu(v)
-    checkeltype(ψ,v)
 
     _nograd = Dict(
         :ψ => ψ isa NoGradArray,
@@ -29,6 +19,13 @@ function InverseWishart(ψ::AbstractMatrix, v::AbstractVector)
     v = _nograd[:v] ? v.data : v
 
     InverseWishart(ψ, v, _nograd)
+end
+
+InverseWishart(ψ::AbstractVector, v::AbstractVector) = InverseWishart(DiagPDMat(ψ), v)
+function InverseWishart(ψ::AbstractVector, dim::Int, v::AbstractVector)
+    length(ψ) == 1 || throw(error(
+        DimensionMismatch("ψ has to be a vector of length 1 to create a ScalPDMat")))
+    InverseWishart(ScalPDMat(ψ[1],dim), v)
 end
 
 Flux.@functor InverseWishart
@@ -45,10 +42,10 @@ rate(p::InverseWishart) = p.v[1]
 
 rand(p::InverseWishart) = error()
 
-function normc0(p::InverseWishart)
+function lognormc0(p::InverseWishart)
     v = rate(p)
     n = length(p)
-    2^(v*p/2) * logmvgamma(p,v/2)
+    (v*p/2)*log(2) + logmvgamma(p,v/2)
 end
 
 function _logpdf(p::InverseWishart, x::AbstractMatrix)
@@ -58,7 +55,7 @@ function _logpdf(p::InverseWishart, x::AbstractMatrix)
     dψ = det(ψ)
     dx = det(x)
 
-    v/2 * log(dψ) -(v+n+1)/2 * log(dx) - tr(ψ*inv(x))/2 - log(normc0(p))
+    v/2 * log(dψ) -(v+n+1)/2 * log(dx) - tr(ψ*inv(x))/2 - lognormc0(p)
 end
 
 logpdf(p::InverseWishart, x::AbstractMatrix) = _logpdf(p,x)
