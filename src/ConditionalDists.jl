@@ -42,4 +42,6 @@ include("cmean_gaussian.jl")
 include("cmeanvar_gaussian.jl")
 include("constspec_gaussian.jl")
 
+include("inverse_gamma.jl")
+
 end # module
