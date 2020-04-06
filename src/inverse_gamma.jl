@@ -58,7 +58,6 @@ mode(p::InverseGamma) = rate(p) / (shape(p) + 1)
 function _logpdf(p::InverseGamma, x::AbstractArray)
     α,β = shape(p), rate(p)
     sum(α*log(β) - loggamma(α) .+ (-α-1)*log.(x) - β ./ x, dims=1)
-    #sum((-α-1)*log.(x) - (β ./ x), dims=1)
 end
 
 logpdf(p::InverseGamma, x::AbstractVector) = _logpdf(p,x)
