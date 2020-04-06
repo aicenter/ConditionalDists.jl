@@ -3,6 +3,7 @@ module ConditionalDists
 using Random
 using LinearAlgebra
 using Distributions
+using SpecialFunctions
 using Flux
 using Flux: @nograd
 
@@ -20,6 +21,8 @@ const CMD = ContinuousMultivariateDistribution
 const ACD = AbstractConditionalDistribution
 
 export Gaussian
+export InverseGamma
+
 export CMeanGaussian, CMGaussian
 export CMeanVarGaussian, CMVGaussian
 export AbstractVar, DiagVar, ScalarVar
@@ -43,5 +46,6 @@ include("cmeanvar_gaussian.jl")
 include("constspec_gaussian.jl")
 
 include("inverse_gamma.jl")
+# include("inverse_wishart.jl")
 
 end # module

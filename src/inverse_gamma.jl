@@ -1,67 +1,70 @@
-struct InverseWishart{P<:AbstractPDMat{T}, V<:AbstractVector{T}} where {T<:Real} <: CMD
-    ψ::P
-    v::V
+struct InverseGamma{A<:AbstractVector} <: CMD
+    α::A
+    β::A
+    xlength::Int
     _nograd::Dict{Symbol,Bool}
 end
 
-function checknu(v::AbstractVector)
-    length(v) == 1 || throw(DimensionMismatch("v must be a vector of length 1"))
-    1
-end
+function InverseGamma(α::AbstractVector, β::AbstractVector, xlength::Int)
+    A, B = eltype(α), eltype(β)
+    A == B || throw(ArgumentError("eltype of α and β must match"))
 
-function InverseWishart(ψ::AbstractMatrix, v::AbstractVector)
-    checknu(v)
+    length(α) == 1 || length(β) == 1 || throw(
+        DimensionMismatch("α and β must by of length one"))
 
     _nograd = Dict(
-        :ψ => ψ isa NoGradArray,
-        :v => v isa NoGradArray)
-    ψ = _nograd[:ψ] ? ψ.data : ψ
-    v = _nograd[:v] ? v.data : v
+        :α => α isa NoGradArray,
+        :β => β isa NoGradArray)
+    α = _nograd[:α] ? α.data : α
+    β = _nograd[:β] ? β.data : β
 
-    InverseWishart(ψ, v, _nograd)
+    InverseGamma(α,β,xlength,_nograd)
 end
 
-InverseWishart(ψ::AbstractVector, v::AbstractVector) = InverseWishart(DiagPDMat(ψ), v)
-function InverseWishart(ψ::AbstractVector, dim::Int, v::AbstractVector)
-    length(ψ) == 1 || throw(error(
-        DimensionMismatch("ψ has to be a vector of length 1 to create a ScalPDMat")))
-    InverseWishart(ScalPDMat(ψ[1],dim), v)
+InverseGamma(α::Real, β::Real, xlength::Int) = InverseGamma([α], [β], xlength)
+
+function InverseGamma(α::Real, β::Real, xlength::Int, nograd::Bool)
+    if nograd 
+        InverseGamma(NoGradArray([α]), NoGradArray([β]), xlength)
+    else
+        InverseGamma(α,β,xlength)
+    end
 end
 
-Flux.@functor InverseWishart
+Flux.@functor InverseGamma
 
-function Flux.trainable(p::InverseWishart)
+function Flux.trainable(p::InverseGamma)
     ps = (;(k=>getfield(p,k) for k in keys(p._nograd) if !p._nograd[k])...)
 end
 
-length(p::InverseWishart) = size(p.ψ, 1)
-eltype(p::InverseWishart) = eltype(p.ψ)
-mean(p::InverseWishart) = scale(p) ./ (rate(v) - length(p) - 1)
-scale(p::InverseWishart) = p.ψ
-rate(p::InverseWishart) = p.v[1]
+length(p::InverseGamma) = p.xlength
+eltype(p::InverseGamma) = eltype(p.α)
+shape(p::InverseGamma) = p.α[1]
+rate(p::InverseGamma) = p.β[1]
 
-rand(p::InverseWishart) = error()
-
-function lognormc0(p::InverseWishart)
-    v = rate(p)
-    n = length(p)
-    (v*p/2)*log(2) + logmvgamma(p,v/2)
+function mean(p::InverseGamma)
+    p.α[1] > 1 || throw(DomainError("mean is only defined for α>1"))
+    rate(p) / (shape(p) - 1)
 end
 
-function _logpdf(p::InverseWishart, x::AbstractMatrix)
-    ψ  = scale(p)
-    v  = rate(p)
-    n  = length(p)
-    dψ = det(ψ)
-    dx = det(x)
-
-    v/2 * log(dψ) -(v+n+1)/2 * log(dx) - tr(ψ*inv(x))/2 - lognormc0(p)
+function var(p::InverseGamma)
+    α,β = shape(p), rate(p)
+    α > 2 || throw(error(DomainError("variance is only defined for α>2")))
+    β^2 / ((α-1)^2 * (α-2))
 end
 
-logpdf(p::InverseWishart, x::AbstractMatrix) = _logpdf(p,x)
-#logpdf(p::InverseWishart, x::AbstractVector) = error()
+mode(p::InverseGamma) = rate(p) / (shape(p) + 1)
 
-function Base.show(io::IO, p::InverseWishart)
-    msg = "InverseWishart(ψ=$(summary(mean(p))), v=$(rate(p))"
-    print(io, msg)
+function _logpdf(p::InverseGamma, x::AbstractArray)
+    α,β = shape(p), rate(p)
+    sum(α*log(β) - loggamma(α) .+ (-α-1)*log.(x) - β ./ x, dims=1)
+    #sum((-α-1)*log.(x) - (β ./ x), dims=1)
+end
+
+logpdf(p::InverseGamma, x::AbstractVector) = _logpdf(p,x)
+logpdf(p::InverseGamma, x::AbstractMatrix) = _logpdf(p,x)
+
+function Base.show(io::IO, p::InverseGamma)
+    msg = "InverseGamma(α=$(shape(p)), β=$(rate(p)))"
+    print(io,msg)
 end
