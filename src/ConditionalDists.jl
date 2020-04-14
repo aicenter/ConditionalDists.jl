@@ -1,51 +1,79 @@
 module ConditionalDists
 
-using Random
-using LinearAlgebra
+export ConditionalMeanVarMvNormal, ConditionalMeanMvNormal
+
 using Distributions
-using SpecialFunctions
-using Flux
-using Flux: @nograd
+using DistributionsAD
 
-# functions that are overloaded by this module
-import Base.length
-import Base.eltype
-import Random.rand
-import Statistics.mean
-import Distributions.cov
-import Distributions.var
-import Distributions.logpdf
+# The goal is to get conditional distributions that are defined by e.g. a
+# MvNormal and a mapping f. They would be used like this:
+#
+# cd = ConditionalDistribution(f, d)
+# mean(d,z)     -> compute mean/var/other modes
+# rand(d,z)     -> sample
+# logpdf(d,x,z) -> compute p(x|z)
+#
+# This can be achieved by defining a `condition` function that creates a proper
+# distributions D form their conditional counter part CD:
+#
+#   condition(cd, z) = D(cd.f(z)...) -> dist
+#
+# The code below illustrates roughly how it could be done for a DiagMvNormals.
+# The ConditionalMeanVarMvNormal implements the case were both mean and
+# variance come from the mapping f. The ConditionalMeanMvNormal the case were
+# only the mean comes from the mapping (i.e. its specific to each input) and the
+# variance is shared for all inputs.
 
-abstract type AbstractConditionalDistribution end
+abstract type ConditionalDistribution end
+
+Base.length(d::ConditionalDistribution) = length(d.d)
+Distributions.rand(d::ConditionalDistribution, z::AbstractVector) = rand(condition(d, z))
+Distributions.logpdf(d::ConditionalDistribution, x::AbstractVector, z::AbstractVector) =
+    logpdf(condition(d, z), x)
+
 const CMD = ContinuousMultivariateDistribution
-const ACD = AbstractConditionalDistribution
 
-export Gaussian
-export InverseGamma
 
-export CMeanGaussian, CMGaussian
-export CMeanVarGaussian, CMVGaussian
-export AbstractVar, DiagVar, ScalarVar
+struct ConditionalMeanVarMvNormal{Td<:CMD,Tf} <: ConditionalDistribution
+    f::Tf
+    d::Td  # TODO: this could be something like <: AbstractTuringMvNormal
+end
 
-export mean
-export cov
-export var
-export mean_var
-export rand
-export logpdf
+# In this case d is in the only used to store information about length (and
+# later for dispatch)
+# Needs an additional constuctor for the ScalMvNormal case
+function ConditionalMeanVarMvNormal(f::Tf, xlength::Int) where Tf
+    d = TuringDiagMvNormal(zeros(xlength), zeros(xlength))
+    ConditionalMeanVarMvNormal(f,d)
+end
 
-# needed to make e.g. sampling work
-@nograd similar, randn!, fill!
+function condition(d::ConditionalMeanVarMvNormal{<:TuringDiagMvNormal}, z::AbstractVector)
+    len = length(d)
+    z = d.f(z)
+    μ = z[1:len]
+    σ = abs.(z[len+1:end]) .+ eps(eltype(z))
+    TuringDiagMvNormal(μ,σ)
+end
 
-include("nogradarray.jl")
+struct ConditionalMeanMvNormal{Td<:CMD,Tf} <: ConditionalDistribution
+    f::Tf
+    d::Td  # TODO: this could be something like <: TuringMvNormal
+end
 
-include("gaussian.jl")
-include("abstract_cgaussian.jl")
-include("cmean_gaussian.jl")
-include("cmeanvar_gaussian.jl")
-include("constspec_gaussian.jl")
+# also needs the construtor for the scalar case
+function ConditionalMeanMvNormal(f::Tf, σ::AbstractVector) where Tf
+    d = TuringDiagMvNormal(zeros(length(σ)), σ)
+    ConditionalMeanMvNormal(f,d)
+end
 
-include("inverse_gamma.jl")
-# include("inverse_wishart.jl")
+function condition(d::ConditionalMeanMvNormal{<:TuringDiagMvNormal}, z::AbstractVector)
+    μ = d.f(z)
+    TuringDiagMvNormal(μ,d.d.σ)
+end
+
+# TODO: these would have to be implemented for each Mean/MeanVar type
+Distributions.mean(d::ConditionalDistribution, z::AbstractVector) = condition(d, z).m
+# TODO: these would have to be implemented for each Diag/Scal type
+Distributions.var(d::ConditionalDistribution, z::AbstractVector) = condition(d, z).σ
 
 end # module
