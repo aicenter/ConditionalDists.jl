@@ -14,15 +14,15 @@ using DistributionsAD
 # logpdf(d,x,z) -> compute p(x|z)
 #
 # This can be achieved by defining a `condition` function that creates a proper
-# distributions D form their conditional counter part CD:
+# distribution D form their conditional counter part CD:
 #
-#   condition(cd, z) = D(cd.f(z)...) -> dist
+#   condition(cd::CD, z) = D(cd.f(z)...) -> d::D
 #
-# The code below illustrates roughly how it could be done for a DiagMvNormals.
+# The code below illustrates roughly how it could be done for DiagMvNormals.
 # The ConditionalMeanVarMvNormal implements the case were both mean and
 # variance come from the mapping f. The ConditionalMeanMvNormal the case were
-# only the mean comes from the mapping (i.e. its specific to each input) and the
-# variance is shared for all inputs.
+# only the mean comes from the mapping (i.e. mean is specific to each input)
+# and the variance is shared for all inputs.
 
 abstract type ConditionalDistribution end
 
@@ -39,8 +39,8 @@ struct ConditionalMeanVarMvNormal{Td<:CMD,Tf} <: ConditionalDistribution
     d::Td  # TODO: this could be something like <: AbstractTuringMvNormal
 end
 
-# In this case d is in the only used to store information about length (and
-# later for dispatch)
+# In this case d is only used to store information about length (and later for
+# dispatch)
 # Needs an additional constuctor for the ScalMvNormal case
 function ConditionalMeanVarMvNormal(f::Tf, xlength::Int) where Tf
     d = TuringDiagMvNormal(zeros(xlength), zeros(xlength))
