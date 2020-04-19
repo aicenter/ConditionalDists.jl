@@ -53,7 +53,7 @@ function condition(d::ConditionalMeanVarMvNormal{<:TuringDiagMvNormal}, z::Abstr
     len = length(d)
     z = d.f(z)
     μ = z[1:len]
-    σ = abs.(z[len+1:end]) .+ eps(eltype(z))
+    σ = abs.(z[len+1:end])
     TuringDiagMvNormal(μ,σ)
 end
 
