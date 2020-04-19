@@ -29,7 +29,9 @@ abstract type ConditionalDistribution end
 Base.length(d::ConditionalDistribution) = length(d.d)
 Distributions.rand(d::ConditionalDistribution, z::AbstractVector) = rand(condition(d, z))
 Distributions.logpdf(d::ConditionalDistribution, x::AbstractVector, z::AbstractVector) =
-    logpdf(condition(d, z), x)
+    logpdf(condition(d,z), x)
+Distributions.logpdf(d::ConditionalDistribution, x::AbstractMatrix, z::AbstractMatrix) =
+    map(i -> logpdf(condition(d, z[:,i]), x[:,i]), 1:size(x,2))
 
 const CMD = ContinuousMultivariateDistribution
 
