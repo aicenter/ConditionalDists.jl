@@ -1,6 +1,6 @@
 using ConditionalDists
 using DistributionsAD
-using Distributions: logpdf
+#using Distributions: logpdf
 using Flux
 
 batch = 10000
@@ -9,7 +9,7 @@ zlength = 150
 
 f = Dense(zlength,xlength*2)
 d = TuringDiagMvNormal(zeros(Float32,xlength), ones(Float32,xlength))
-p = ConditionalMeanVarMvNormal(f,d)
+p = ConditionalMeanVarMvNormal(d,f)
 
 z = randn(Float32, zlength, batch)
 x = randn(Float32, xlength, batch)
