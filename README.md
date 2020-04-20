@@ -10,6 +10,11 @@ conjunction with Flux models to provide trainable mappings. As an example,
 consider a conditional Gaussian for which you want to learn a mapping and a
 shared variance:
 
+cd = ConditionalDistribution(f, d)
+mean(d,z)     -> compute mean/var/other modes
+rand(d,z)     -> sample
+logpdf(d,x,z) -> compute p(x|z)
+
 ```julia
 julia> using ConditionalDists;
 julia> using Flux;
