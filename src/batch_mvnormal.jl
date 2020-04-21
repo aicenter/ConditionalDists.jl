@@ -12,7 +12,7 @@ mean(d::BatchMvNormal) = d.μ
 var(d::BatchDiagNormal) = abs2.(d.σ)
 var(d::BatchScalNormal) = fill!(similar(d.σ,size(d.μ,1)),1) .* reshape(abs2.(d.σ),1,:)
 
-function rand(d::BatchScalNormal)
+function rand(d::BatchMvNormal)
     μ = d.μ
     σ = d.σ
     r = randn!(similar(μ))
