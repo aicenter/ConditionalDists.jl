@@ -39,8 +39,8 @@ end
 
 length(p::InverseGamma) = p.xlength
 eltype(p::InverseGamma) = eltype(p.α)
-shape(p::InverseGamma) = p.α[1]
-rate(p::InverseGamma) = p.β[1]
+shape(p::InverseGamma) = abs(p.α[1]) + eps(eltype(p.α))
+rate(p::InverseGamma) = abs(p.β[1]) + eps(eltype(p.β))
 
 function mean(p::InverseGamma)
     p.α[1] > 1 || throw(DomainError("mean is only defined for α>1"))
