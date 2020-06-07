@@ -32,7 +32,7 @@ Base.size(d::TuringMvNormal) = (length(d),)
 Distributions.params(d::TuringMvNormal) = (d.μ, d.σ)
 Distributions.mean(d::TuringMvNormal) = d.μ
 
-Distributions.var(d::TuringDenseMvNormal) = diag(d.σ)
+Distributions.var(d::TuringDenseMvNormal) = diag(Matrix(d.σ))
 Distributions.var(d::TuringDiagMvNormal) = d.σ .^2
 Distributions.var(d::TuringScalMvNormal) = fill!(similar(d.μ,length(d)), d.σ^2)
 Distributions.cov(d::TuringDenseMvNormal) = d.σ
@@ -68,10 +68,10 @@ function _logpdf(d::TuringDiagMvNormal, x::AbstractMatrix)
 end
 
 function _logpdf(d::TuringDenseMvNormal, x::AbstractVector)
-    return -(length(x) * log(2π) + logdet(d.C) + sum(abs2.(zygote_ldiv(d.C.U', x .- d.μ)))) / 2
+    return -(length(x) * log(2π) + logdet(d.σ) + sum(abs2.(zygote_ldiv(d.σ.U', x .- d.μ)))) / 2
 end
 function _logpdf(d::TuringDenseMvNormal, x::AbstractMatrix)
-    return -((size(x, 1) * log(2π) + logdet(d.C)) .+ vec(sum(abs2.(zygote_ldiv(d.C.U', x .- d.μ)), dims=1))) ./ 2
+    return -((size(x, 1) * log(2π) + logdet(d.σ)) .+ vec(sum(abs2.(zygote_ldiv(d.σ.U', x .- d.μ)), dims=1))) ./ 2
 end
 
 for T in (:AbstractVector, :AbstractMatrix)
