@@ -11,7 +11,7 @@ function condition(p::CMVDiagMvNormal, z::AbstractVector)
     x = p.mapping(z)
     μ = x[1:n]
     σ = abs.(x[n+1:end])
-    TuringDiagMvNormal(μ,σ)
+    TuringMvNormal(μ,σ)
 end
 
 function condition(p::CMVDiagMvNormal, z::AbstractMatrix)
@@ -27,7 +27,7 @@ function condition(p::CMVScalMvNormal, z::AbstractVector)
     x = p.mapping(z)
     μ = x[1:n]
     σ = abs(x[end])
-    TuringScalMvNormal(μ,σ)
+    TuringMvNormal(μ,σ)
 end
 
 function condition(p::CMVScalMvNormal, z::AbstractMatrix)
@@ -38,10 +38,8 @@ function condition(p::CMVScalMvNormal, z::AbstractMatrix)
     BatchMvNormal(μ,σ)
 end
 
-mean(p::ConditionalMvNormal, z::AbstractVector) = condition(p,z).m
-var(p::ConditionalMvNormal, z::AbstractVector) = abs2.(condition(p,z).σ)
-mean(p::ConditionalMvNormal, z::AbstractMatrix) = mean(condition(p,z))
-var(p::ConditionalMvNormal, z::AbstractMatrix) = var(condition(p,z))
-rand(p::ConditionalMvNormal, z::AbstractVecOrMat) = rand(condition(p,z))
-logpdf(p::ConditionalMvNormal, x::AbstractVecOrMat, z::AbstractVecOrMat) =
+Distributions.mean(p::ConditionalMvNormal, z::AbstractVecOrMat) = mean(condition(p,z))
+Distributions.var(p::ConditionalMvNormal, z::AbstractVecOrMat) = var(condition(p,z))
+Distributions.rand(p::ConditionalMvNormal, z::AbstractVecOrMat) = rand(condition(p,z))
+Distributions.logpdf(p::ConditionalMvNormal, x::AbstractVecOrMat, z::AbstractVecOrMat) =
     logpdf(condition(p,z), x)

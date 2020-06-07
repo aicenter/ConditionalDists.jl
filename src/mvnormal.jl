@@ -3,7 +3,7 @@ const AbstractVar{T} = Union{<:Cholesky{<:T},<:AbstractVector{<:T},T} where T<:R
 struct TuringMvNormal{Tm<:AbstractVector, Ts<:AbstractVar} <: ContinuousMultivariateDistribution
     μ::Tm
     σ::Ts
-    TuringMvNormal{Tm,Ts}(μ,σ) where {Tm<:AbstractVar,Ts<:AbstractVar} = new(μ,σ)
+    TuringMvNormal{Tm,Ts}(μ,σ) where {Tm<:AbstractVector,Ts<:AbstractVar} = new(μ,σ)
 end
 
 # TODO: not sure if the constructors are good. I am trying to prevent mixed Float32/Float64 types... #

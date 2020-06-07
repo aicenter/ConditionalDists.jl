@@ -6,13 +6,13 @@
     zlength = 2
     batchsize = 10
     m = Dense(zlength, 2*xlength)
-    d = TuringDiagMvNormal(zeros(Float32,xlength), ones(Float32,xlength))
+    d = TuringMvNormal(zeros(Float32,xlength), ones(Float32,xlength))
     p = ConditionalMeanVarMvNormal(d,m)
 
     res = condition(p, rand(zlength))
-    μ = res.m
-    σ2 = res.σ
-    @test res isa TuringDiagMvNormal
+    μ = mean(res)
+    σ2 = var(res)
+    @test res isa ConditionalDists.TuringDiagMvNormal
     @test size(μ) == (xlength,)
     @test size(σ2) == (xlength,)
 

@@ -20,10 +20,9 @@ export mean,
     logpdf,
     condition
 
-export TuringMvNormal
-    #ConditionalMeanVarMvNormal,
-    #BatchMvNormal
-
+export TuringMvNormal,
+    BatchMvNormal,
+    ConditionalMeanVarMvNormal
 
 const CMD = ContinuousMultivariateDistribution
 abstract type ConditionalDistribution end
@@ -32,7 +31,7 @@ abstract type ConditionalMvNormal <: ConditionalDistribution end
 Base.length(p::ConditionalDistribution) = length(p.distribution)
 
 include("mvnormal.jl")
-# include("batch_mvnormal.jl")
-# include("cond_mvnormal.jl")
+include("batch_mvnormal.jl")
+include("cond_mvnormal.jl")
 
 end # module

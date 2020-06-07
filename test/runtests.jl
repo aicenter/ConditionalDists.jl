@@ -6,9 +6,9 @@ using LinearAlgebra
 using Distributions
 #using DistributionsAD
 using ConditionalDists
-#using Flux
+using Flux
 
 
 include("mvnormal.jl")
-# include("batch_mvnormal.jl")
-# include("cond_mvnormal.jl")
+include("cond_mvnormal.jl")
+include("batch_mvnormal.jl")
