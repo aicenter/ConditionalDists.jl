@@ -3,10 +3,9 @@ struct ConditionalMeanVarMvNormal{Td<:TuringMvNormal,Tm} <: ConditionalMvNormal
     mapping::Tm
 end
 
-const CMVDiagMvNormal = ConditionalMeanVarMvNormal{<:TuringDiagMvNormal}
-const CMVScalMvNormal = ConditionalMeanVarMvNormal{<:TuringScalMvNormal}
+const CMVMvNormal = ConditionalMeanVarMvNormal
 
-function condition(p::CMVDiagMvNormal, z::AbstractVector)
+function condition(p::CMVMvNormal, z::AbstractVector)
     n = length(p)
     x = p.mapping(z)
     μ = x[1:n]
@@ -14,27 +13,11 @@ function condition(p::CMVDiagMvNormal, z::AbstractVector)
     TuringMvNormal(μ,σ)
 end
 
-function condition(p::CMVDiagMvNormal, z::AbstractMatrix)
+function condition(p::CMVMvNormal, z::AbstractMatrix)
     n = length(p)
     x = p.mapping(z)
     μ = x[1:n,:]
     σ = abs.(x[n+1:end,:])
-    BatchMvNormal(μ,σ)
-end
-
-function condition(p::CMVScalMvNormal, z::AbstractVector)
-    n = length(p)
-    x = p.mapping(z)
-    μ = x[1:n]
-    σ = abs(x[end])
-    TuringMvNormal(μ,σ)
-end
-
-function condition(p::CMVScalMvNormal, z::AbstractMatrix)
-    n = length(p)
-    x = p.mapping(z)
-    μ = x[1:n,:]
-    σ = abs.(x[end,:])
     BatchMvNormal(μ,σ)
 end
 

@@ -3,14 +3,14 @@
     xlen = 10
     batch = 3
     μ = rand(Float32, xlen, batch)
-    σ = rand(Float32, batch)
+    σ = rand(Float32, xlen, batch)
     x = rand(Float32, xlen, batch)
 
     d = BatchMvNormal(μ,σ)
 
     llh = logpdf(d,x)
     
-    testds  = [MvNormal(m,s) for (m,s) in zip(eachcol(μ),σ)]
+    testds  = [MvNormal(m,s) for (m,s) in zip(eachcol(μ), eachcol(σ))]
     testllh = [logpdf(p,c) for (p,c) in zip(testds,eachcol(x))]
 
     @test eltype(llh) == Float32

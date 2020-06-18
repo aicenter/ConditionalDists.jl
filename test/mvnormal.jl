@@ -18,7 +18,7 @@
     d = TuringMvNormal(μ,σ)
     @test length(d) == length(μ)
     @test eltype(d) == eltype(μ)
-    @test params(d) == (μ,σ)
+    @test Distributions.params(d) == (μ,σ)
     @test mean(d) == μ
     @test var(d) == σ .^2
 
