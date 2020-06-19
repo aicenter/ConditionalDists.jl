@@ -14,6 +14,7 @@ BatchMvNormal(μ::AbstractMatrix, σ::AbstractVecOrMat) = BatchMvNormal(μ,sqrt.
 
 Base.length(d::BatchMvNormal) = size(d.μ,1)
 Base.eltype(d::BatchMvNormal) = eltype(d.μ)
+Distributions.params(d::BatchMvNormal) = (d.μ, d.σ)
 Distributions.mean(d::BatchMvNormal) = d.μ
 Distributions.var(d::BatchDiagNormal) = d.σ .^2
 Distributions.var(d::BatchScalNormal) = fill!(similar(d.σ,size(d.μ,1)),1) .* reshape(d.σ .^2,1,:)

@@ -5,20 +5,7 @@ using LinearAlgebra
 using Random
 using StatsBase
 
-# using DistributionsAD
-#using PDMats
-
-# import Distributions.mean,
-#     Distributions.var,
-#     Distributions.logpdf,
-#     Base.rand,
-#     Base.eltype,
-#     Base.length
-
-export mean,
-    var,
-    logpdf,
-    condition
+export mean, var, logpdf, condition
 
 export TuringMvNormal,
     BatchMvNormal,

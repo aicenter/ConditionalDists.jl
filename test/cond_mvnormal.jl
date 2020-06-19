@@ -32,8 +32,16 @@
 
     x = rand(Float32, xlength, batchsize)
     z = rand(Float32, zlength, batchsize)
-    loss() = sum(logpdf(p,x,z))
+    loss(x) = sum(logpdf(p,x,z))
     ps = Flux.params(p)
-    @test length(ps) == 2
-    @test_nowarn gs = Flux.gradient(loss, ps)
+
+    reverse_zygote = Zygote.gradient(loss, x)[1]
+    reverse_diff = ReverseDiff.gradient(loss, x)
+    forward = ForwardDiff.gradient(loss, x)
+
+    rtol = atol = 1e-7
+    #@test isapprox(reverse_tracker, forward, rtol=rtol, atol=atol)
+    @test isapprox(reverse_zygote, forward, rtol=rtol, atol=atol)
+    @test isapprox(reverse_diff, forward, rtol=rtol, atol=atol)
+
 end

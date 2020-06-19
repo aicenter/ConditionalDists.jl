@@ -54,24 +54,30 @@ function Distributions.rand(rng::Random.AbstractRNG, d::TuringScalMvNormal, n::I
 end
 
 function _logpdf(d::TuringScalMvNormal, x::AbstractVector)
-    return -(length(x) * log(2π * abs2(d.σ)) + sum(abs2.((x .- d.μ) ./ d.σ))) / 2
+    T = eltype(d)
+    return -(length(x) * log(T(2π) * abs2(d.σ)) + sum(abs2.((x .- d.μ) ./ d.σ))) / 2
 end
 function _logpdf(d::TuringScalMvNormal, x::AbstractMatrix)
-    return -(size(x, 1) * log(2π * abs2(d.σ)) .+ vec(sum(abs2.((x .- d.μ) ./ d.σ), dims=1))) ./ 2
+    T = eltype(d)
+    return -(size(x, 1) * log(T(2π) * abs2(d.σ)) .+ vec(sum(abs2.((x .- d.μ) ./ d.σ), dims=1))) ./ 2
 end
 
 function _logpdf(d::TuringDiagMvNormal, x::AbstractVector)
-    return -(length(x) * log(2π) + 2 * sum(log.(d.σ)) + sum(abs2.((x .- d.μ) ./ d.σ))) / 2
+    T = eltype(d)
+    return -(length(x) * log(T(2π)) + 2 * sum(log.(d.σ)) + sum(abs2.((x .- d.μ) ./ d.σ))) / 2
 end
 function _logpdf(d::TuringDiagMvNormal, x::AbstractMatrix)
-    return -((size(x, 1) * log(2π) + 2 * sum(log.(d.σ))) .+ vec(sum(abs2.((x .- d.μ) ./ d.σ), dims=1))) ./ 2
+    T = eltype(d)
+    return -((size(x, 1) * log(T(2π)) + 2 * sum(log.(d.σ))) .+ vec(sum(abs2.((x .- d.μ) ./ d.σ), dims=1))) ./ 2
 end
 
 function _logpdf(d::TuringDenseMvNormal, x::AbstractVector)
-    return -(length(x) * log(2π) + logdet(d.σ) + sum(abs2.(zygote_ldiv(d.σ.U', x .- d.μ)))) / 2
+    T = eltype(d)
+    return -(length(x) * log(T(2π)) + logdet(d.σ) + sum(abs2.(d.σ.U' \ (x .- d.μ)))) / 2
 end
 function _logpdf(d::TuringDenseMvNormal, x::AbstractMatrix)
-    return -((size(x, 1) * log(2π) + logdet(d.σ)) .+ vec(sum(abs2.(zygote_ldiv(d.σ.U', x .- d.μ)), dims=1))) ./ 2
+    T = eltype(d)
+    return -((size(x, 1) * log(T(2π)) + logdet(d.σ)) .+ vec(sum(abs2.(d.σ.U' \ (x .- d.μ)), dims=1))) ./ 2
 end
 
 for T in (:AbstractVector, :AbstractMatrix)

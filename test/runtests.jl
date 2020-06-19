@@ -1,12 +1,12 @@
 using Revise
 
 using Test
-#using PDMats
 using LinearAlgebra
 using Distributions
-#using DistributionsAD
 using ConditionalDists
+
 using Flux
+using ReverseDiff, Tracker, ForwardDiff, Zygote
 
 
 include("mvnormal.jl")
