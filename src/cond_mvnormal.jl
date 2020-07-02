@@ -1,4 +1,4 @@
-struct ConditionalMeanVarMvNormal{Td<:TuringMvNormal,Tm} <: ConditionalMvNormal
+struct ConditionalMeanVarMvNormal{Td<:Distributions.AbstractMvNormal,Tm} <: ConditionalMvNormal
     distribution::Td
     mapping::Tm
 end
@@ -10,9 +10,10 @@ function condition(p::CMVMvNormal, z::AbstractVector)
     x = p.mapping(z)
     μ = x[1:n]
     σ = abs.(x[n+1:end])
-    TuringMvNormal(μ,σ)
+    MvNormal(μ,σ)
 end
 
+#=
 function condition(p::CMVMvNormal, z::AbstractMatrix)
     n = length(p)
     x = p.mapping(z)
@@ -20,6 +21,7 @@ function condition(p::CMVMvNormal, z::AbstractMatrix)
     σ = abs.(x[n+1:end,:])
     BatchMvNormal(μ,σ)
 end
+=#
 
 Distributions.mean(p::ConditionalMvNormal, z::AbstractVecOrMat) = mean(condition(p,z))
 Distributions.var(p::ConditionalMvNormal, z::AbstractVecOrMat) = var(condition(p,z))
