@@ -22,7 +22,7 @@ CMeanGaussian{DiagVar}(mapping=Dense(3, 2), σ2=2-element Array{Float32,1}
 
 julia> X = randn(T, xlen, 10);
 julia> Z = randn(T, zlen, 10);
-julia> logpdf(cpdf, X, Z)  # compute p(X|Z)
+julia> logpdf(cpdf, Z, X)  # compute p(Z|X)
 1×10 Array{Float32,2}:
  -6.45847  -6.47164  -6.44917  -6.46053  -6.45961  -6.45457  -6.44526  -6.4592  -6.47359  -6.45476
 
@@ -51,7 +51,7 @@ julia> Flux.train!(loss, ps, data, opt);
 The learnt mean and variance are fairly close to a standard normal:
 ```julia
 julia> mean_var(cpdf, randn(T,xlen))
-(Float32[-0.03580121, 0.002174838], Float32[1.0000002; 1.0000002])
+(Float32[0.0047478476, -0.0003239157], Float32[1.0000002; 1.0000002])
 
 julia> rand(cpdf, rand(T,xlen,10))  # sample from trained cpdf
 2×5 Array{Float32,2}:
