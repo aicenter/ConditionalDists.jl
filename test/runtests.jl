@@ -5,8 +5,6 @@ using DistributionsAD
 using ConditionalDists
 using Flux
 
-using Zygote
-
 using ConditionalDists: BatchMvNormal
 
 include("batch_mvnormal.jl")
