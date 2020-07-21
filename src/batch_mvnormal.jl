@@ -10,14 +10,6 @@ end
 
 const BMN = Union{BatchScalMvNormal,BatchDiagMvNormal}
 
-#=
-struct BatchMvNormal{Tm<:AbstractMatrix,Tσ<:AbstractVecOrMat}
-    μ::Tm
-    σ::Tσ
-    BatchMvNormal{Tm,Ts}(μ,σ) where {Tm<:AbstractMatrix,Ts<:AbstractVecOrMat} = new(μ,σ)
-end
-=#
-
 BatchMvNormal(μ::AbstractMatrix{T}, σ::AbstractVector{T}) where T<:Real = BatchScalMvNormal(μ,σ)
 BatchMvNormal(μ::AbstractMatrix{T}, σ::AbstractMatrix{T}) where T<:Real = BatchDiagMvNormal(μ,σ)
 
