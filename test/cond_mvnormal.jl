@@ -14,17 +14,16 @@
     μ = mean(res)
     Σ = cov(res)
     σ2 = var(res)
-    display(res)
-    display(Σ)
     @test_broken Σ isa PDMats.PDiagMat
     @test size(μ) == (xlength,)
     @test size(σ2) == (xlength,)
 
     x = rand(Float32, xlength)
     z = rand(Float32, zlength)
-    loss(x) = logpdf(p,x,z)
+    loss() = logpdf(p,x,z)
+    ps = Flux.params(p)
     @test_broken loss(x) isa Float32
-    @test_nowarn gs = Zygote.gradient(loss, x)[1]
+    @test_nowarn Flux.gradient(loss, ps)
 
     # BatchDiagMvNormal
     res = condition(p, rand(zlength,batchsize))

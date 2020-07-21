@@ -19,8 +19,8 @@
     testllh = Float32.([logpdf(p,x) for (p,x) in zip(testds,eachcol(xs))])
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
-    f(x) = sum(logpdf(d, x))
-    @test_nowarn zygote = Zygote.gradient(f, xs)[1]
+    f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ), x))
+    @test_nowarn zygote = Zygote.gradient(f, xs, μs, σs)
 
     # BatchScalMvNormal
     μs = rand(Float32, xlen, batch)
@@ -33,7 +33,7 @@
     testllh = Float32.([logpdf(p,x) for (p,x) in zip(testds,eachcol(xs))])
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
-    f(x) = sum(logpdf(d, x))
-    @test_nowarn zygote = Zygote.gradient(f, xs)[1]
+    f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ), x))
+    @test_nowarn zygote = Zygote.gradient(f, xs, μs, σs)
 
 end
