@@ -22,11 +22,10 @@ julia> m = Dense(zlength, 2*xlength)
 julia> d = MvNormal(zeros(xlength), ones(xlength))
 julia> p = ConditionalMvNormal(d,m)
 
-julia> # BatchDiagMvNormal
-julia> res = condition(p, rand(zlength,batchsize))
+julia> res = condition(p, rand(zlength))  # this also works for batches!
 julia> μ = mean(res)
 julia> σ2 = var(res)
-julia> @assert res isa ConditionalDists.BatchDiagMvNormal
+julia> @assert res isa MvNormal
 
 julia> x = rand(xlength, batchsize)
 julia> z = rand(zlength, batchsize)
@@ -35,13 +34,12 @@ julia> logpdf(p,x,z)
  -4.75223  -8.37436   -6.79707  -2.32712   0.236871
  -6.60262   0.119544  -2.40393   7.17728  -9.87703 
 
-julia> rand(cp, randn(xlen,10))  # sample from cpdf
+julia> rand(p, randn(zlength, 10))
 ```
 
-The trainable parameters (W,b of the `Dense` layer and the shared variance of
-`cpdf`) are accessible as usual through `Flux.params` (because we called `Flux.@functor`).
-The next few lines show how to optimize `cp` to match a given Gaussian by
-using the `kl_divergence` defined in
-[IPMeasures.jl](https://github.com/aicenter/IPMeasures.jl).
+The trainable parameters (W,b of the `Dense` layer) are accessible as usual
+through `Flux.params` (because we called `Flux.@functor`).  The next few lines
+show how to optimize `cp` to match a given Gaussian by using the
+`kl_divergence` defined in [IPMeasures.jl](https://github.com/aicenter/IPMeasures.jl).
 
 ...
