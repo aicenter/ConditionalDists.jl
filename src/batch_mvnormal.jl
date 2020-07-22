@@ -22,9 +22,14 @@ Distributions.var(d::BMN) = d.σ .^2
 #Distributions.var(d::BatchScalMvNormal) = fill(similar(d.σ,size(d.μ,1)),1) .* reshape(d.σ .^2,1,:)
 #Distributions.var(d::BatchScalMvNormal) = ones(eltype(d), size(d.μ,1), 1) .* reshape(d.σ .^2, 1, :)
 
-function Distributions.rand(d::BMN)
-    μ = d.μ
-    σ = d.σ
+function Distributions.rand(d::BatchDiagMvNormal)
+    μ, σ = d.μ, d.σ
+    r = randn!(similar(μ))
+    μ .+ σ .* r
+end
+
+function Distributions.rand(d::BatchScalMvNormal)
+    μ, σ = d.μ, reshape(d.σ, 1, :)
     r = randn!(similar(μ))
     μ .+ σ .* r
 end
