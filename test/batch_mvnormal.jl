@@ -11,18 +11,18 @@
     d = BatchMvNormal(μs,σs)
     @test eltype(d) == eltype(μs)
     @test Distributions.params(d) == (μs,σs)
-    @test mean(d) == μs
-    @test var(d) == σs .^2
+    @test all(mean(d) .== μs)
+    @test all(var(d) .== σs .^2)
 
-    llh = logpdf(d,xs)
+    llh = logpdf(d|>gpu, xs|>gpu) |> cpu
     testds  = [MvNormal(m,s) for (m,s) in zip(eachcol(μs), eachcol(σs))]
     testllh = Float32.([logpdf(p,x) for (p,x) in zip(testds,eachcol(xs))])
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
-    f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ), x))
+    f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ) |> gpu, x |> gpu))
     @test_nowarn Flux.gradient(f, xs, μs, σs)
 
-    f(μ, σ) = sum(rand(BatchMvNormal(μ,σ)))
+    f(μ, σ) = sum(rand(BatchMvNormal(μ,σ) |> gpu))
     @test_nowarn Flux.gradient(f, μs, σs)
 
     # BatchScalMvNormal
@@ -31,15 +31,15 @@
     xs = rand(Float32, xlen, batch)
     d = BatchMvNormal(μs,ss)
 
-    llh = logpdf(d,xs)
+    llh = logpdf(d|>gpu,xs|>gpu) |> cpu
     testds  = [MvNormal(m,s) for (m,s) in zip(eachcol(μs),ss)]
     testllh = Float32.([logpdf(p,x) for (p,x) in zip(testds,eachcol(xs))])
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
-    f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ), x))
-    @test_nowarn zygote = Flux.gradient(f, xs, μs, σs)
+    f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ|>gpu, σ|>gpu), x|>gpu))
+    @test_nowarn Flux.gradient(f, xs, μs, ss)
 
-    f(μ, σ) = sum(rand(BatchMvNormal(μ,σ)))
+    f(μ, σ) = sum(rand(BatchMvNormal(μ,σ)|>gpu))
     @test_nowarn Flux.gradient(f, μs, ss)
 
 end
