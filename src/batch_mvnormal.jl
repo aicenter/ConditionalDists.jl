@@ -28,7 +28,6 @@ Zygote.@nograd _randn_init
 function Distributions.rand(d::BatchDiagMvNormal)
     μ, σ = d.μ, d.σ
     r = _randn_init(μ)
-    r = Zygote.ignore
     μ .+ σ .* r
 end
 
