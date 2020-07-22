@@ -20,7 +20,10 @@
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
     f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ), x))
-    @test_nowarn zygote = Flux.gradient(f, xs, μs, σs)
+    @test_nowarn Flux.gradient(f, xs, μs, σs)
+
+    f(μ, σ) = sum(rand(BatchMvNormal(μ,σ)))
+    @test_nowarn Flux.gradient(f, μs, σs)
 
     # BatchScalMvNormal
     μs = rand(Float32, xlen, batch)
@@ -35,5 +38,8 @@
 
     f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ), x))
     @test_nowarn zygote = Flux.gradient(f, xs, μs, σs)
+
+    f(μ, σ) = sum(rand(BatchMvNormal(μ,σ)))
+    @test_nowarn Flux.gradient(f, μs, ss)
 
 end

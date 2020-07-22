@@ -13,7 +13,7 @@ assume you want to learn the mapping from a conditional to an MvNormal
 julia> using Distributions, DistributionsAD, Flux
 julia> using ConditionalDists
 
-julia> Flux.@functor ConditionalMeanVarMvNormal
+julia> Flux.@functor ConditionalMeanVarMvNormal  # make it a functor!
 
 julia> xlength = 3
 julia> zlength = 2
@@ -38,9 +38,10 @@ julia> logpdf(p,x,z)
 julia> rand(cp, randn(xlen,10))  # sample from cpdf
 ```
 
-The trainable parameters (W,b of the Dense layer and the shared variance of
-`cpdf`) are accesible as usual through `params`.  The next few lines show how
-to optimize `cpdf` to match a given Gaussian by using the `kl_divergence` defined
-in [IPMeasures.jl](https://github.com/aicenter/IPMeasures.jl).
+The trainable parameters (W,b of the `Dense` layer and the shared variance of
+`cpdf`) are accessible as usual through `Flux.params` (because we called `Flux.@functor`).
+The next few lines show how to optimize `cp` to match a given Gaussian by
+using the `kl_divergence` defined in
+[IPMeasures.jl](https://github.com/aicenter/IPMeasures.jl).
 
 ...

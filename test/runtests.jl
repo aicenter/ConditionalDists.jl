@@ -1,5 +1,6 @@
 using Test
 using LinearAlgebra
+using PDMats
 using Distributions
 using DistributionsAD
 using ConditionalDists

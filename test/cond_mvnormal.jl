@@ -12,9 +12,8 @@
     # MvNormal
     res = condition(p, rand(zlength))
     μ = mean(res)
-    Σ = cov(res)
     σ2 = var(res)
-    @test_broken Σ isa PDMats.PDiagMat
+    @test res.Σ isa PDMats.PDiagMat
     @test size(μ) == (xlength,)
     @test size(σ2) == (xlength,)
 
@@ -22,8 +21,11 @@
     z = rand(Float32, zlength)
     loss() = logpdf(p,x,z)
     ps = Flux.params(p)
-    @test_broken loss(x) isa Float32
+    @test_broken loss() isa Float32
     @test_nowarn Flux.gradient(loss, ps)
+
+    f() = sum(rand(p,z))
+    @test_nowarn Flux.gradient(f, ps)
 
     # BatchDiagMvNormal
     res = condition(p, rand(zlength,batchsize))
@@ -38,8 +40,12 @@
     loss() = sum(logpdf(p,x,z))
     ps = Flux.params(p)
     @test length(ps) == 2
-    @test_broken loss(x) isa Float32
+    @test loss() isa Float32
     @test_nowarn gs = Flux.gradient(loss, ps)
+
+    f() = sum(rand(p,z))
+    @test_nowarn Flux.gradient(f, ps)
+
 
     # BatchScalMvNormal
     m = Dense(zlength, xlength+1)
@@ -58,7 +64,10 @@
     loss() = sum(logpdf(p,x,z))
     ps = Flux.params(p)
     @test length(ps) == 2
-    @test_broken loss(x) isa Float32
+    @test loss() isa Float32
     @test_nowarn gs = Flux.gradient(loss, ps)
+
+    f() = sum(rand(p,z))
+    @test_nowarn Flux.gradient(f, ps)
 
 end
