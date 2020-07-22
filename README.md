@@ -19,13 +19,12 @@ julia> xlength = 3
 julia> zlength = 2
 julia> batchsize = 10
 julia> m = Dense(zlength, 2*xlength)
-julia> d = MvNormal(zeros(xlength), ones(xlength))
-julia> p = ConditionalMvNormal(d,m)
+julia> p = ConditionalMvNormal(xlength,m)
 
 julia> res = condition(p, rand(zlength))  # this also works for batches!
 julia> μ = mean(res)
 julia> σ2 = var(res)
-julia> @assert res isa MvNormal
+julia> @assert res isa DistributionsAD.TuringDiagMvNormal
 
 julia> x = rand(xlength, batchsize)
 julia> z = rand(zlength, batchsize)
