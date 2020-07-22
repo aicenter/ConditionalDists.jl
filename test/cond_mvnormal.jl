@@ -1,13 +1,13 @@
-@testset "ConditionalMeanVarMvNormal" begin
+@testset "ConditionalMvNormal" begin
 
-    Flux.@functor ConditionalMeanVarMvNormal
+    Flux.@functor ConditionalMvNormal
 
     xlength = 3
     zlength = 2
     batchsize = 10
     m = Dense(zlength, 2*xlength)
     d = MvNormal(zeros(Float32,xlength), ones(Float32,xlength))
-    p = ConditionalMeanVarMvNormal(d,m)
+    p = ConditionalMvNormal(d,m)
 
     # MvNormal
     res = condition(p, rand(zlength))
@@ -50,7 +50,7 @@
     # BatchScalMvNormal
     m = Dense(zlength, xlength+1)
     d = MvNormal(zeros(Float32,xlength), 1f0)
-    p = ConditionalMeanVarMvNormal(d,m)
+    p = ConditionalMvNormal(d,m)
 
     res = condition(p, rand(zlength,batchsize))
     μ = mean(res)

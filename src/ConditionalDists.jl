@@ -8,11 +8,10 @@ using DistributionsAD
 
 export condition
 
-export ConditionalMeanVarMvNormal
+export ConditionalMvNormal
 
 const CMD = ContinuousMultivariateDistribution
 abstract type ConditionalDistribution end
-abstract type ConditionalMvNormal <: ConditionalDistribution end
 
 Base.length(p::ConditionalDistribution) = length(p.distribution)
 

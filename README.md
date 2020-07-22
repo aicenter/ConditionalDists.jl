@@ -13,14 +13,14 @@ assume you want to learn the mapping from a conditional to an MvNormal
 julia> using Distributions, DistributionsAD, Flux
 julia> using ConditionalDists
 
-julia> Flux.@functor ConditionalMeanVarMvNormal  # make it a functor!
+julia> Flux.@functor ConditionalMvNormal  # make it a functor!
 
 julia> xlength = 3
 julia> zlength = 2
 julia> batchsize = 10
 julia> m = Dense(zlength, 2*xlength)
 julia> d = MvNormal(zeros(xlength), ones(xlength))
-julia> p = ConditionalMeanVarMvNormal(d,m)
+julia> p = ConditionalMvNormal(d,m)
 
 julia> # BatchDiagMvNormal
 julia> res = condition(p, rand(zlength,batchsize))
