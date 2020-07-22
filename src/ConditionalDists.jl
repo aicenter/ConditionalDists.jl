@@ -20,7 +20,7 @@ export ConditionalMvNormal
 const CMD = ContinuousMultivariateDistribution
 abstract type ConditionalDistribution end
 
-Base.length(p::ConditionalDistribution) = length(p.distribution)
+Base.length(p::ConditionalDistribution) = p.xlength
 
 include("batch_mvnormal.jl")
 include("cond_mvnormal.jl")
