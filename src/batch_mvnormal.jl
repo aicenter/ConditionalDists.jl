@@ -22,9 +22,6 @@ Distributions.var(d::BMN) = d.σ .^2
 #Distributions.var(d::BatchScalMvNormal) = fill(similar(d.σ,size(d.μ,1)),1) .* reshape(d.σ .^2,1,:)
 #Distributions.var(d::BatchScalMvNormal) = ones(eltype(d), size(d.μ,1), 1) .* reshape(d.σ .^2, 1, :)
 
-_randn_init(x) = randn!(similar(x))
-Zygote.@nograd _randn_init
-
 function Distributions.rand(d::BatchDiagMvNormal)
     μ, σ = d.μ, d.σ
     r = _randn_init(μ)

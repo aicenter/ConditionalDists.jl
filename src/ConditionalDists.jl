@@ -6,13 +6,6 @@ using StatsBase
 using Distributions
 using DistributionsAD
 
-using Zygote # for @nograd calls...
-# TODO: can we instead use:
-# using ZygoteRules
-# ignore(f) = f()
-# ZygoteRules.@adjoint ignore(f) = f(), _ -> nothing
-# or: https://github.com/JuliaDiff/ChainRulesCore.jl/issues/150
-
 export condition
 
 export ConditionalMvNormal
@@ -21,6 +14,16 @@ const CMD = ContinuousMultivariateDistribution
 abstract type ConditionalDistribution end
 
 Base.length(p::ConditionalDistribution) = p.xlength
+
+_randn_init(x) = randn!(similar(x))
+
+# nograd for _randn_init
+function rrule(::typeof(_randn_init), x)
+    function _randn_init_pullback(ΔQ)
+        return (ChainRulesCore.NOFIELDS, ChainRulesCore.Zero())
+    end
+    _randn_init(x), _randn_init_pullback
+end
 
 include("batch_mvnormal.jl")
 include("cond_mvnormal.jl")
