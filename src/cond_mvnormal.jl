@@ -1,4 +1,4 @@
-struct ConditionalMvNormal{Tm} <: ConditionalDistribution
+struct ConditionalMvNormal{Tm} <: AbstractConditionalDistribution
     xlength::Int
     mapping::Tm
 end
@@ -25,14 +25,10 @@ function condition(p::ConditionalMvNormal, z::AbstractMatrix)
     BatchMvNormal(μ,σ)
 end
 
+Base.length(p::ConditionalMvNormal) = p.xlength
+
 # TODO: this should be moved to DistributionsAD
 Distributions.mean(p::TuringDiagMvNormal) = p.m
 Distributions.mean(p::TuringScalMvNormal) = p.m
 Distributions.var(p::TuringDiagMvNormal) = p.σ .^2
 Distributions.var(p::TuringScalMvNormal) = p.σ^2
-
-Distributions.mean(p::ConditionalMvNormal, z::AbstractVecOrMat) = mean(condition(p,z))
-Distributions.var(p::ConditionalMvNormal, z::AbstractVecOrMat) = var(condition(p,z))
-Distributions.rand(p::ConditionalMvNormal, z::AbstractVecOrMat) = rand(condition(p,z))
-Distributions.logpdf(p::ConditionalMvNormal, x::AbstractVecOrMat, z::AbstractVecOrMat) =
-    logpdf(condition(p,z), x)
