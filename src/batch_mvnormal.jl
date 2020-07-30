@@ -47,3 +47,13 @@ function Distributions.logpdf(d::BatchScalMvNormal, x::AbstractMatrix{T}) where 
     σ2 = reshape(var(d), 1, :)
     -(vec(sum(((x - μ).^2) ./ σ2 .+ log.(σ2), dims=1)) .+ n*log(T(2π))) / 2
 end
+
+_randn_init(x) = randn!(similar(x))
+
+# nograd for _randn_init
+function rrule(::typeof(_randn_init), x)
+    function _randn_init_pullback(ΔQ)
+        return (ChainRulesCore.NOFIELDS, ChainRulesCore.Zero())
+    end
+    _randn_init(x), _randn_init_pullback
+end

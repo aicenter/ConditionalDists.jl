@@ -8,21 +8,29 @@ using DistributionsAD
 
 export condition
 
+export ConditionalDistribution
 export ConditionalMvNormal
 
-const CMD = ContinuousMultivariateDistribution
-abstract type ConditionalDistribution end
+abstract type AbstractConditionalDistribution end
+const ACD = AbstractConditionalDistribution
 
-Base.length(p::ConditionalDistribution) = p.xlength
+Distributions.mean(p::ACD, z::AbstractVecOrMat) = mean(condition(p,z))
+Distributions.var(p::ACD, z::AbstractVecOrMat) = var(condition(p,z))
+Distributions.rand(p::ACD, z::AbstractVecOrMat) = rand(condition(p,z))
+Distributions.logpdf(p::ACD, x::AbstractVecOrMat, z::AbstractVecOrMat) = logpdf(condition(p,z), x)
 
-_randn_init(x) = randn!(similar(x))
+struct ConditionalDistribution{Td,Tm} <: AbstractConditionalDistribution
+    distribution::Td  # TODO: would be nice if this was restricted to Distribution
+    mapping::Tm
+end
 
-# nograd for _randn_init
-function rrule(::typeof(_randn_init), x)
-    function _randn_init_pullback(ΔQ)
-        return (ChainRulesCore.NOFIELDS, ChainRulesCore.Zero())
-    end
-    _randn_init(x), _randn_init_pullback
+function condition(p::ConditionalDistribution, x::AbstractVector)
+    p.distribution(p.mapping(x)...)
+end
+
+function condition(p::ConditionalDistribution, xs::AbstractMatrix)
+    ds = map(i -> condition(p, xs[:,i]), 1:size(xs,2))
+    arraydist(ds)
 end
 
 include("batch_mvnormal.jl")
