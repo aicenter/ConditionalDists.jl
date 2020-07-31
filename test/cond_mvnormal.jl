@@ -3,8 +3,8 @@
     xlength = 3
     zlength = 2
     batchsize = 10
-    m = Dense(zlength, 2*xlength)
-    p = ConditionalMvNormal(xlength,m) |> gpu
+    m = SplitLayer(zlength, [xlength,xlength])
+    p = ConditionalMvNormal(m) |> gpu
 
     # MvNormal
     res = condition(p, rand(zlength) |> gpu)
@@ -36,7 +36,7 @@
     z = rand(Float32, zlength, batchsize) |> gpu
     loss() = sum(logpdf(p,x,z))
     ps = Flux.params(p)
-    @test length(ps) == 2
+    @test length(ps) == 4
     @test loss() isa Float32
     @test_nowarn gs = Flux.gradient(loss, ps)
 
@@ -45,9 +45,9 @@
 
 
     # BatchScalMvNormal
-    m = Dense(zlength, xlength+1)
+    m = SplitLayer(zlength, [xlength,1])
     d = MvNormal(zeros(Float32,xlength), 1f0)
-    p = ConditionalMvNormal(xlength,m) |> gpu
+    p = ConditionalMvNormal(m) |> gpu
 
     res = condition(p, rand(zlength,batchsize)|>gpu)
     μ = mean(res)
@@ -60,7 +60,7 @@
     z = rand(Float32, zlength, batchsize) |> gpu
     loss() = sum(logpdf(p,x,z))
     ps = Flux.params(p)
-    @test length(ps) == 2
+    @test length(ps) == 4
     @test loss() isa Float32
     @test_nowarn gs = Flux.gradient(loss, ps)
 
