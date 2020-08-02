@@ -29,7 +29,7 @@ function condition(p::ConditionalDistribution, x::AbstractVector)
 end
 
 function condition(p::ConditionalDistribution, xs::AbstractMatrix)
-    ds = map(i -> condition(p, xs[:,i]), 1:size(xs,2))
+    ds = map(i -> condition(p, view(xs, :, i)), 1:size(xs,2))
     arraydist(ds)
 end
 
