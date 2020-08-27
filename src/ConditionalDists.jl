@@ -1,45 +1,39 @@
 module ConditionalDists
 
-using Random
 using LinearAlgebra
+using Random
+using StatsBase
 using Distributions
-using Flux
-using Flux: @nograd
+using DistributionsAD
 
-# functions that are overloaded by this module
-import Base.length
-import Base.eltype
-import Random.rand
-import Statistics.mean
-import Distributions.cov
-import Distributions.var
-import Distributions.logpdf
+export condition
+
+export ConditionalDistribution
+export ConditionalMvNormal
 
 abstract type AbstractConditionalDistribution end
-const CMD = ContinuousMultivariateDistribution
 const ACD = AbstractConditionalDistribution
 
-export Gaussian
-export CMeanGaussian, CMGaussian
-export CMeanVarGaussian, CMVGaussian
-export AbstractVar, DiagVar, ScalarVar
+Distributions.mean(p::ACD, z::AbstractVecOrMat) = mean(condition(p,z))
+Distributions.var(p::ACD, z::AbstractVecOrMat) = var(condition(p,z))
+Distributions.rand(p::ACD, z::AbstractVecOrMat) = rand(condition(p,z))
+Distributions.logpdf(p::ACD, x::AbstractVecOrMat, z::AbstractVecOrMat) = logpdf(condition(p,z), x)
 
-export mean
-export cov
-export var
-export mean_var
-export rand
-export logpdf
+struct ConditionalDistribution{Td,Tm} <: AbstractConditionalDistribution
+    distribution::Td  # TODO: would be nice if this was restricted to Distribution
+    mapping::Tm
+end
 
-# needed to make e.g. sampling work
-@nograd similar, randn!, fill!
+function condition(p::ConditionalDistribution, x::AbstractVector)
+    p.distribution(p.mapping(x)...)
+end
 
-include("nogradarray.jl")
+function condition(p::ConditionalDistribution, xs::AbstractMatrix)
+    ds = map(i -> condition(p, view(xs, :, i)), 1:size(xs,2))
+    arraydist(ds)
+end
 
-include("gaussian.jl")
-include("abstract_cgaussian.jl")
-include("cmean_gaussian.jl")
-include("cmeanvar_gaussian.jl")
-include("constspec_gaussian.jl")
+include("batch_mvnormal.jl")
+include("cond_mvnormal.jl")
 
 end # module
