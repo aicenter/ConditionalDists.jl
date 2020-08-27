@@ -35,10 +35,7 @@ julia> logpdf(p,x,z)
 
 julia> rand(p, randn(zlength, 10))
 ```
-
 The trainable parameters (W,b of the `Dense` layer) are accessible as usual
 through `Flux.params` (because we called `Flux.@functor`).  The next few lines
 show how to optimize `cp` to match a given Gaussian by using the
 `kl_divergence` defined in [IPMeasures.jl](https://github.com/aicenter/IPMeasures.jl).
-
-...
