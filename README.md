@@ -21,10 +21,8 @@ julia> m(rand(2))
 With the mapping `m` we can create a conditional distribution with trainable
 mapping parameters:
 ```julia
-julia> using Distributions, DistributionsAD, Flux
-julia> using ConditionalDists
-
-julia> Flux.@functor ConditionalMvNormal  # make it a functor!
+julia> using ConditionalDists, Distributions
+julia> using ConditionalDists: SplitLayer
 
 julia> xlength = 3
 julia> zlength = 2
@@ -42,7 +40,7 @@ julia> z = rand(zlength, batchsize)
 julia> logpdf(p,x,z)
 julia> rand(p, randn(zlength, 10))
 ```
-The trainable parameters (W,b of the `Dense` layer) are accessible as usual
-through `Flux.params` (because we called `Flux.@functor`).  The next few lines
-show how to optimize `p` to match a given Gaussian by using the
-`kl_divergence` defined in [IPMeasures.jl](https://github.com/aicenter/IPMeasures.jl).
+The trainable parameters (W,b of the `SplitLayer`) are accessible as usual
+through `Flux.params`.  The next few lines show how to optimize `p` to match a
+given Gaussian by using the `kl_divergence` defined in
+[IPMeasures.jl](https://github.com/aicenter/IPMeasures.jl).
