@@ -1,3 +1,28 @@
+"""
+    ConditionalMvNormal(m)
+
+Specialization of ConditionalDistribution for `MvNormal`s for performance.
+Does the same as ConditionalDistribution(MvNormal,m) for vector inputs (to e.g.
+mean/logpdf).  For batches of inputs a `BatchMvNormal` is constructed that does
+not just map over the batch but uses faster matrix multiplications.
+
+# Examples
+```julia-repl
+julia> m = ConditionalDists.SplitLayer(100,[100,100])
+julia> p = ConditionalMvNormal(m)
+julia> @time rand(p, rand(100,10000);
+julia> @time rand(p, rand(100,10000);
+julia> @time rand(p, rand(100,10000);
+ 0.047122 seconds (23 allocations: 38.148 MiB, 24.25% gc time)
+
+julia> p = ConditionalDistribution(MvNormal, m)
+julia> @time rand(p, rand(100,10000);
+julia> @time rand(p, rand(100,10000);
+julia> @time rand(p, rand(100,10000);
+ 3.626042 seconds (159.97 k allocations: 18.681 GiB, 34.92% gc time)
+```
+
+"""
 struct ConditionalMvNormal{Tm} <: AbstractConditionalDistribution
     mapping::Tm
 end
