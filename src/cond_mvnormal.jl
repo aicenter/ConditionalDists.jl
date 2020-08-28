@@ -6,6 +6,10 @@ Does the same as ConditionalDistribution(MvNormal,m) for vector inputs (to e.g.
 mean/logpdf).  For batches of inputs a `BatchMvNormal` is constructed that does
 not just map over the batch but uses faster matrix multiplications.
 
+The mapping `m` must return either a `Tuple` with mean and variance, or just a
+mean vector. If the output of `m` is just a vector, the variance is assumed to
+be a fixed unit variance.
+
 # Examples
 ```julia-repl
 julia> m = ConditionalDists.SplitLayer(100,[100,100])
@@ -28,7 +32,7 @@ struct ConditionalMvNormal{Tm} <: AbstractConditionalDistribution
 end
 
 function condition(p::ConditionalMvNormal, z::AbstractVector)
-    (μ,σ) = p.mapping(z)
+    (μ,σ) = mean_var(p.mapping(z))
     if length(σ) == 1
         σ = σ[1]
     end
@@ -36,12 +40,16 @@ function condition(p::ConditionalMvNormal, z::AbstractVector)
 end
 
 function condition(p::ConditionalMvNormal, z::AbstractMatrix)
-    (μ,σ) = p.mapping(z)
+    (μ,σ) = mean_var(p.mapping(z))
     if size(σ,1) == 1
         σ = dropdims(σ, dims=1)
     end
     BatchMvNormal(μ,σ)
 end
+
+mean_var(x::Tuple) = x
+mean_var(x::AbstractVector) = (x, 1)
+mean_var(x::AbstractMatrix) = (x, fillsimilar(x,size(x,2),1))
 
 # TODO: this should be moved to DistributionsAD
 Distributions.mean(p::TuringDiagMvNormal) = p.m
