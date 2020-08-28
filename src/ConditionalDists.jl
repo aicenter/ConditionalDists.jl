@@ -5,6 +5,7 @@ using Random
 using Flux
 using Distributions
 using DistributionsAD
+using ChainRulesCore
 
 export condition
 
