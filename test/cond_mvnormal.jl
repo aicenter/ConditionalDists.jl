@@ -54,7 +54,7 @@
     σ2 = var(res)
     @test res isa ConditionalDists.BatchScalMvNormal
     @test size(μ) == (xlength,batchsize)
-    @test size(σ2) == (batchsize,)
+    @test size(σ2) == (xlength,batchsize)
 
     x = rand(Float32, xlength, batchsize) |> gpu
     z = rand(Float32, zlength, batchsize) |> gpu
@@ -78,7 +78,7 @@
     σ2 = var(res)
     @test res isa ConditionalDists.BatchScalMvNormal
     @test size(μ) == (xlength,batchsize)
-    @test size(σ2) == (batchsize,)
+    @test size(σ2) == (xlength,batchsize)
 
     x = rand(Float32, xlength, batchsize) |> gpu
     z = rand(Float32, zlength, batchsize) |> gpu
