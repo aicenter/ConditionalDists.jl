@@ -48,3 +48,5 @@ Distributions.mean(p::TuringDiagMvNormal) = p.m
 Distributions.mean(p::TuringScalMvNormal) = p.m
 Distributions.var(p::TuringDiagMvNormal) = p.σ .^2
 Distributions.var(p::TuringScalMvNormal) = p.σ^2
+
+Flux.@functor ConditionalMvNormal

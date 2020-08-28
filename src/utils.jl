@@ -1,5 +1,3 @@
-using .Flux: Dense
-
 struct SplitLayer
     layers::Tuple
 end
@@ -17,10 +15,4 @@ function (m::SplitLayer)(x)
     Tuple(layer(x) for layer in m.layers)
 end
 
-Flux.@functor ConditionalDists.BatchDiagMvNormal
-Flux.@functor ConditionalDists.BatchScalMvNormal
-Flux.@functor DistributionsAD.TuringDiagMvNormal
-Flux.@functor DistributionsAD.TuringScalMvNormal
-Flux.@functor ConditionalDistribution
-Flux.@functor ConditionalMvNormal
 Flux.@functor SplitLayer

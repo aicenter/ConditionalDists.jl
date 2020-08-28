@@ -59,3 +59,5 @@ function Base.show(io::IO, p::ConditionalDistribution)
     Nm = repr(p.mapping)
     print(io, "$Np($Nd, $Nm)")
 end
+
+Flux.@functor ConditionalDistribution
