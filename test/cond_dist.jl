@@ -3,7 +3,7 @@
     xlength = 3
     zlength = 2
     batchsize = 10
-    m = SplitLayer(zlength, [xlength,xlength])
+    m = SplitLayer(zlength, [xlength,xlength], [identity,abs])
     d = TuringMvNormal
     p = ConditionalDistribution(d,m) |> gpu
 

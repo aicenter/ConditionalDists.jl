@@ -7,24 +7,11 @@ Conditional probability distributions powered by Flux.jl and Distributions.jl.
 
 The conditional PDFs that are defined in this package can be used in
 conjunction with Flux models to provide trainable mappings. As an example,
-assume you want to learn the mapping from a conditional to an MvNormal.
-The mapping `m` takes a vector `x` and maps it to a mean `μ` and a variance `σ`,
-which can be achieved by using a `SplitLayer` as the last layer in your network
-like the one below:
-```julia
-struct SplitLayer
-    layers::Tuple
-end
-function SplitLayer(input::Int, outputs::Array{Int,1}, act=abs)
-    SplitLayer(Tuple(Dense(input,out,act) for out in outputs))
-end
-function (m::SplitLayer)(x)
-    Tuple(layer(x) for layer in m.layers)
-end
-Flux.@functor SplitLayer
-```
-The `SplitLayer` is constructed from `N` `Dense` layers (with same input size)
-and outputs `N` vectors:
+assume you want to learn the mapping from a conditional to an MvNormal.  The
+mapping `m` takes a vector `x` and maps it to a mean `μ` and a variance `σ`,
+which can be achieved by using a `ConditionalDists.SplitLayer` as the last
+layer in your network like the one below: The `SplitLayer` is constructed from
+`N` `Dense` layers (with same input size) and outputs `N` vectors:
 ```julia
 julia> m = SplitLayer(2, [3,4])
 julia> m(rand(2))
