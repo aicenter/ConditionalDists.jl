@@ -40,7 +40,32 @@ julia> z = rand(zlength, batchsize)
 julia> logpdf(p,x,z)
 julia> rand(p, randn(zlength, 10))
 ```
-The trainable parameters (W,b of the `SplitLayer`) are accessible as usual
+The trainable parameters (of the `SplitLayer`) are accessible as usual
 through `Flux.params`.  The next few lines show how to optimize `p` to match a
 given Gaussian by using the `kl_divergence` defined in
 [IPMeasures.jl](https://github.com/aicenter/IPMeasures.jl).
+
+```julia
+julia> using IPMeasures
+
+julia> d = MvNormal(zeros(xlength), ones(xlength))
+julia> loss(x) = sum(kl_divergence(p, d, x))
+julia> opt = ADAM(0.1)
+julia> data = [(randn(zlength),) for i in 1:2000]
+julia> Flux.train!(loss, Flux.params(p), data, opt)
+```
+The learnt mean and variance are close to a standard normal:
+```julia
+julia> @assert condition(p, randn(zlength)) isa DistributionsAD.TuringDiagMvNormal
+julia> mean(p,randn(zlength))
+3-element Array{Float32,1}:
+  0.003194877
+  1.7912015f-32
+ -1.6101733f-6
+
+julia> var(p,randn(zlength))
+3-element Array{Float32,1}:
+ 1.000585
+ 1.0021493
+ 1.0000007
+```
