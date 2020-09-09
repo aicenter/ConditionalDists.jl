@@ -7,7 +7,7 @@ using Distributions
 using DistributionsAD
 using ChainRulesCore
 
-export condition
+export condition, mean, var, rand
 
 export ConditionalDistribution
 export ConditionalMvNormal
