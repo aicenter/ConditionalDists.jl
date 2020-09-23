@@ -22,13 +22,13 @@ Distributions.var(d::BatchScalMvNormal) = fillsimilar(d.σ,size(d.μ,1),1) .* re
 
 function Distributions.rand(d::BatchDiagMvNormal)
     μ, σ = d.μ, d.σ
-    r = randnsimilar(μ)
+    r = DistributionsAD.adapt_randn(Random.GLOBAL_RNG, μ, size(μ)...)
     μ .+ σ .* r
 end
 
 function Distributions.rand(d::BatchScalMvNormal)
     μ, σ = d.μ, reshape(d.σ, 1, :)
-    r = randnsimilar(μ)
+    r = DistributionsAD.adapt_randn(Random.GLOBAL_RNG, μ, size(μ)...)
     μ .+ σ .* r
 end
 
