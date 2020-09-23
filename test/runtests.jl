@@ -10,5 +10,7 @@ using DistributionsAD: TuringMvNormal
 using ConditionalDists: BatchMvNormal, SplitLayer
 
 include("cond_dist.jl")
-include("batch_mvnormal.jl")
 include("cond_mvnormal.jl")
+
+# for the BatchMvNormal tests to work BatchMvNormals have to be functors!
+include("batch_mvnormal.jl")

@@ -1,5 +1,9 @@
 @testset "BatchMvNormal" begin
 
+    # for the BatchMvNormal tests to work BatchMvNormals have to be functors!
+    Flux.@functor ConditionalDists.BatchDiagMvNormal
+    Flux.@functor ConditionalDists.BatchScalMvNormal
+
     # BatchDiagMvNormal
     xlen = 10
     batch = 3
