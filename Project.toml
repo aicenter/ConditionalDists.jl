@@ -1,26 +1,27 @@
 name = "ConditionalDists"
 uuid = "c648c4dd-c1e0-49a6-84b9-144ae7fd2468"
 authors = ["Niklas Heim <niklas.heim@aic.fel.cvut.cz>"]
-version = "0.4.2"
+version = "0.4.3"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DistributionsAD = "ced4e74d-a319-5a8a-b0ac-84af2272839c"
-Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Functors = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 
 [compat]
 ChainRulesCore = "0.9"
 Distributions = "0.23"
 DistributionsAD = "0.6"
-Flux = "0.11"
 julia = "1"
 
 [extras]
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "PDMats"]
+test = ["Test", "Flux", "PDMats"]

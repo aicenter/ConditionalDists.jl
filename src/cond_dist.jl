@@ -60,4 +60,4 @@ function Base.show(io::IO, p::ConditionalDistribution)
     print(io, "$Np($Nd, $Nm)")
 end
 
-Flux.@functor ConditionalDistribution
+@functor ConditionalDistribution
