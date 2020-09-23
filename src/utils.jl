@@ -15,7 +15,7 @@ function (m::SplitLayer)(x)
     Tuple(layer(x) for layer in m.layers)
 end
 
-Flux.@functor SplitLayer
+@functor SplitLayer
 
 
 # TODO: replace with DistributionsAD.randnsimilar

@@ -2,10 +2,10 @@ module ConditionalDists
 
 using LinearAlgebra
 using Random
-using Flux
 using Distributions
 using DistributionsAD
 using ChainRulesCore
+using Functors
 
 export condition
 
