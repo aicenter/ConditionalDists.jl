@@ -36,9 +36,5 @@ function Distributions.logpdf(d::BMN, x::AbstractMatrix{T}) where T<:Real
     n = size(d.μ,1)
     μ = mean(d)
     σ2 = var(d)
-
-    # TODO: somehow this prevents a CUDA scalar getindex error in GenerativeModels.jl
-    #       remove when not needed anymore. maybe with CUDA 2.0?
-    v = sum(((x - μ).^2) ./ σ2 .+ log.(σ2), dims=1)
-    -vec(v) .+ n*log(T(2π)) / 2
+    -(vec(sum(((x - μ).^2) ./ σ2 .+ log.(σ2), dims=1)) .+ n*log(T(2π))) ./ 2
 end
