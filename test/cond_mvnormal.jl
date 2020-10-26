@@ -46,7 +46,6 @@
 
     # BatchScalMvNormal
     m = SplitLayer(zlength, [xlength,1])
-    d = MvNormal(zeros(Float32,xlength), 1f0)
     p = ConditionalMvNormal(m) |> gpu
 
     res = condition(p, rand(zlength,batchsize)|>gpu)
@@ -70,7 +69,6 @@
 
     # Unit variance
     m = Dense(zlength,xlength)
-    d = MvNormal(zeros(Float32,xlength), 1f0)
     p = ConditionalMvNormal(m) |> gpu
 
     res = condition(p, rand(zlength,batchsize)|>gpu)
@@ -90,4 +88,30 @@
 
     f() = sum(rand(p,z))
     @test_nowarn Flux.gradient(f, ps)
+
+
+    # Fixed scalar variance
+    m = Dense(zlength,xlength)
+    σ(x::AbstractVector) = 2
+    σ(x::AbstractMatrix) = ones(Float32,size(x,2)) .* 2
+    p = ConditionalMvNormal(SplitLayer(m,σ)) |> gpu
+
+    res = condition(p, rand(zlength,batchsize)|>gpu)
+    μ = mean(res)
+    σ2 = var(res)
+    @test res isa ConditionalDists.BatchScalMvNormal
+    @test size(μ) == (xlength,batchsize)
+    @test size(σ2) == (xlength,batchsize)
+
+    x = rand(Float32, xlength, batchsize) |> gpu
+    z = rand(Float32, zlength, batchsize) |> gpu
+    loss() = sum(logpdf(p,x,z))
+    ps = Flux.params(p)
+    @test length(ps) == 2
+    @test loss() isa Float32
+    @test_nowarn gs = Flux.gradient(loss, ps)
+
+    f() = sum(rand(p,z))
+    @test_nowarn Flux.gradient(f, ps)
+
 end
