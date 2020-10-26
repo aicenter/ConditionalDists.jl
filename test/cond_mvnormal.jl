@@ -92,7 +92,9 @@
 
     # Fixed scalar variance
     m = Dense(zlength,xlength)
-    p = ConditionalMvNormal(SplitLayer(m,_->2)) |> gpu
+    σ(x::AbstractVector) = 2
+    σ(x::AbstractMatrix) = ones(Float32,size(x,2)) .* 2
+    p = ConditionalMvNormal(SplitLayer(m,σ)) |> gpu
 
     res = condition(p, rand(zlength,batchsize)|>gpu)
     μ = mean(res)
