@@ -47,9 +47,18 @@ function condition(p::ConditionalMvNormal, z::AbstractMatrix)
     BatchMvNormal(μ,σ)
 end
 
+# dispatches for different outputs from mappings
+# general case
 mean_var(x::Tuple) = x
+# single output assumes σ=1
 mean_var(x::AbstractVector) = (x, 1)
 mean_var(x::AbstractMatrix) = (x, fillsimilar(x,size(x,2),1))
+# fixed scalar variance
+# mean_var(x::Tuple{<:AbstractVector,<:Real}) = x; is already coverged
+function mean_var(x::Tuple{<:AbstractMatrix,<:Real})
+    (μ,σ) = x
+    (μ,fillsimilar(μ,size(μ,2),σ))
+end
 
 # TODO: this should be moved to DistributionsAD
 Distributions.mean(p::TuringDiagMvNormal) = p.m
