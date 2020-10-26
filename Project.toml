@@ -1,7 +1,7 @@
 name = "ConditionalDists"
 uuid = "c648c4dd-c1e0-49a6-84b9-144ae7fd2468"
 authors = ["Niklas Heim <niklas.heim@aic.fel.cvut.cz>"]
-version = "0.4.4"
+version = "0.4.5"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
