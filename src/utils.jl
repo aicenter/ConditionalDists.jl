@@ -1,11 +1,8 @@
-struct SplitLayer
-    layers::Tuple
+struct SplitLayer{T<:Tuple}
+    layers::T
 end
 
-function SplitLayer(in::Int, outs::Vector{Int}, act=identity)
-    acts = [act for _ in 1:length(outs)]
-    SplitLayer(in, outs, acts)
-end
+SplitLayer(xs...) = SplitLayer(xs)
 
 function (m::SplitLayer)(x)
     Tuple(layer(x) for layer in m.layers)
