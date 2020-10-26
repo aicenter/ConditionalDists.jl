@@ -46,7 +46,6 @@
 
     # BatchScalMvNormal
     m = SplitLayer(zlength, [xlength,1])
-    d = MvNormal(zeros(Float32,xlength), 1f0)
     p = ConditionalMvNormal(m) |> gpu
 
     res = condition(p,Z)
@@ -68,7 +67,6 @@
 
     # Unit variance
     m = Dense(zlength,xlength)
-    d = MvNormal(zeros(Float32,xlength), 1f0)
     p = ConditionalMvNormal(m) |> gpu
 
     res = condition(p,Z)
@@ -90,7 +88,9 @@
 
     # Fixed scalar variance
     m = Dense(zlength,xlength)
-    p = ConditionalMvNormal(SplitLayer(m,_->2)) |> gpu
+    σ(x::AbstractVector) = 2
+    σ(x::AbstractMatrix) = ones(Float32,size(x,2)) .* 2
+    p = ConditionalMvNormal(SplitLayer(m,σ)) |> gpu
 
     res = condition(p,Z)
     μ = mean(res)
@@ -111,16 +111,9 @@
 
     # Shared scalar variance TODO: add case for vector shared variance
     m = Dense(zlength,xlength)
-    σ = ones(Float32,xlength) .* 2
+    # σ = ones(Float32,xlength) .* 2
     σ = 2f0
     p = ConditionalMvNormal(SplitLayer(m,σ)) |> gpu
-
-    #x = rand(Float32,zlength,10)
-    #display(p.mapping(x))
-    #display(condition(p,x))
-    #display(var(condition(p,x)))
-    #display((σ .^2) .* ones(xlength,batchsize))
-    #error()
 
     res = condition(p,Z)
     μ = mean(res)
