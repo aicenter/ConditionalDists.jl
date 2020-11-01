@@ -52,7 +52,11 @@
             @test_nowarn Flux.gradient(loss, ps)
 
             f() = sum(rand(p,z))
-            @test_broken Flux.gradient(f, ps)
+            gs = Flux.gradient(f,ps)
+            for p in ps
+                g = gs[p]
+                @test all(isfinite.(g)) && all(g .!= 0)
+            end
 
 
             # batch tests
@@ -68,7 +72,11 @@
             @test_nowarn Flux.gradient(loss, ps)
 
             f() = sum(rand(p,Z))
-            @test_broken Flux.gradient(f, ps)
+            gs = Flux.gradient(f,ps)
+            for p in ps
+                g = gs[p]
+                @test all(isfinite.(g)) && all(g .!= 0)
+            end
         end
     end
 end
