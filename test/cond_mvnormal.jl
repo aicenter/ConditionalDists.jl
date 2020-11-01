@@ -24,7 +24,11 @@
         ("vector μ / fixed scalar σ",
          SplitLayer(Dense(zlength,xlength), σscalar), Real, 2),
         ("vector μ / unit σ",
-         Dense(zlength,xlength), Real, 2)
+         Dense(zlength,xlength), Real, 2),
+        ("vector μ / shared, trainable vector σ",
+         SplitLayer(Dense(zlength,xlength), ones(Float32,xlength)), Vector, 3),
+        ("vector μ / shared, trainable scalar σ",
+         SplitLayer(Dense(zlength,xlength), 1f0), Real, 3)
     ]
 
     disttypes(::Type{<:Vector}) = (TuringDiagMvNormal,ConditionalDists.BatchDiagMvNormal)

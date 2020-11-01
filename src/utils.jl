@@ -26,7 +26,7 @@ struct TrainableScalar{T<:Real}
 end
 TrainableScalar(x::Real) = TrainableScalar([x])
 (s::TrainableScalar)(x::AbstractVector) = s.s[1]
-(s::TrainableScalar)(x::AbstractMatrix) = fillsimilar(x,size(x,ndims(x)),s.s[1])
+(s::TrainableScalar)(x::AbstractMatrix) = fillsimilar(x,size(x,ndims(x)),1) .* s.s
 @functor TrainableScalar
 
 maybe_trainable(x) = x
