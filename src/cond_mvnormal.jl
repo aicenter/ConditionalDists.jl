@@ -1,18 +1,13 @@
 """
     ConditionalMvNormal(m)
 
-Specialization of ConditionalDistribution for `MvNormal`s for performance.
-Does the same as ConditionalDistribution(MvNormal,m) for vector inputs (to e.g.
-mean/logpdf).  For batches of inputs a `BatchMvNormal` is constructed that does
+Specialization of ConditionalDistribution for `MvNormal`s (for performance with
+batches of inputs).  Does the same as ConditionalDistribution(MvNormal,m)
+but for batches of inputs a `BatchMvNormal` is constructed that does
 not just map over the batch but uses faster matrix multiplications.
 
-The mapping `m` must return either a `Tuple` with mean and variance, or just a
-mean vector. If the output of `m` is just a vector, the variance is assumed to
-be a fixed unit variance.
-
-# Examples
 ```julia-repl
-julia> m = ConditionalDists.SplitLayer(100,[100,100])
+julia> m = SplitLayer(100,[100,100])
 julia> p = ConditionalMvNormal(m)
 julia> @time rand(p, rand(100,10000);
 julia> @time rand(p, rand(100,10000);
@@ -26,6 +21,51 @@ julia> @time rand(p, rand(100,10000);
  3.626042 seconds (159.97 k allocations: 18.681 GiB, 34.92% gc time)
 ```
 
+The mapping `m` must return a `Tuple` with mean and variance.
+For a convenient way of doing this you can use a `SplitLayer`.
+
+
+# Examples
+
+`ConditionalMvNormal` and `SplitLayer` together support 3 different variance
+configurations: fixed/unit variance, shared variance, and trained variance. The
+three different configurations are explained below.
+
+## Fixed/unit variance
+
+Pass a function to the `SplitLayer` that returns the fixed variance with
+appropriate batch dimensions
+```julia-repl
+julia> σ(x::Vector) = 2
+julia> σ(x::Matrix) = ones(Float32,size(x,2)) .* 2
+julia> m = SplitLayer(Dense(2,3), σ)
+julia> p = ConditionalMvNormal(m)
+julia> condition(p,rand(Float32,2)) isa DistributionsAD.TuringScalMvNormal
+```
+Passing a mapping with a single output array assumes unit variance.
+
+## Shared variance
+
+For a learned variance that is the same across the the whole batch, simply pass
+a vector (or scalar) to the `SplitLayer`. The `SplitLayer` wraps vectors/scalars
+into a `TrainableVector`s/`TrainableScalar`s.
+```julia-repl
+julia> m = SplitLayer(Dense(2,3), ones(Float32,3))
+julia> p = ConditionalMvNormal(m)
+julia> condition(p,rand(Float32,2)) isa DistributionsAD.TuringDiagMvNormal
+```
+
+## Trained variance
+
+Simply pass another trainable mapping for the variance. By just supplying input
+sizes to `SplitLayer` you can automatically create `Dense` layers with given
+activation functions. In this example the second activation function makes sure
+that the variance is always positive
+```julia-repl
+julia> m = SplitLayer(2,[3,1],[identity,abs])
+julia> p = ConditionalMvNormal(m)
+julia> condition(p,rand(Float32,2)) isa DistributionsAD.TuringScalMvNormal
+```
 """
 struct ConditionalMvNormal{Tm} <: AbstractConditionalDistribution
     mapping::Tm
