@@ -60,8 +60,9 @@ end
 # for use as e.g. shared variance
 struct TrainableScalar{T<:Real}
     s::AbstractVector{T}
+    TrainableScalar{T}(x::T) where T<:Real = new{T}([x])
 end
-TrainableScalar(x::Real) = TrainableScalar([x])
+TrainableScalar(x::T) where T<:Real = TrainableScalar{T}(x)
 (s::TrainableScalar)(x::AbstractVector) = s.s[1]
 (s::TrainableScalar)(x::AbstractMatrix) = fillsimilar(x,size(x,ndims(x)),1) .* s.s
 @functor TrainableScalar
