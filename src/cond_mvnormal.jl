@@ -1,18 +1,21 @@
 """
     ConditionalMvNormal(m)
 
-Specialization of ConditionalDistribution for `MvNormal`s for performance.
-Does the same as ConditionalDistribution(MvNormal,m) for vector inputs (to e.g.
-mean/logpdf).  For batches of inputs a `BatchMvNormal` is constructed that does
+Specialization of ConditionalDistribution for `MvNormal`s (for performance with
+batches of inputs).  Does the same as ConditionalDistribution(MvNormal,m)
+but for batches of inputs a `BatchMvNormal` is constructed that does
 not just map over the batch but uses faster matrix multiplications.
 
-The mapping `m` must return either a `Tuple` with mean and variance, or just a
+The mapping `m` must return either a `Tuple` with mean and variance.
+For a convenient way of do this you can use a `SplitLayer`.
+
+or just a
 mean vector. If the output of `m` is just a vector, the variance is assumed to
 be a fixed unit variance.
 
 # Examples
 ```julia-repl
-julia> m = ConditionalDists.SplitLayer(100,[100,100])
+julia> m = SplitLayer(100,[100,100])
 julia> p = ConditionalMvNormal(m)
 julia> @time rand(p, rand(100,10000);
 julia> @time rand(p, rand(100,10000);
