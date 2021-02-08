@@ -100,10 +100,4 @@ function mean_var(x::Tuple{<:AbstractMatrix,<:Real})
     (μ,fillsimilar(μ,size(μ,2),σ))
 end
 
-# TODO: this should be moved to DistributionsAD
-Distributions.mean(p::TuringDiagMvNormal) = p.m
-Distributions.mean(p::TuringScalMvNormal) = p.m
-Distributions.var(p::TuringDiagMvNormal) = p.σ .^2
-Distributions.var(p::TuringScalMvNormal) = p.σ^2
-
 @functor ConditionalMvNormal
