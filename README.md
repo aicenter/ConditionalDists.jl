@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/aicenter/ConditionalDists.jl.svg?branch=master)](https://travis-ci.com/aicenter/ConditionalDists.jl)
+![Run tests](https://github.com/aicenter/ConditionalDists.jl/workflows/Run%20tests/badge.svg)
 [![codecov](https://codecov.io/gh/aicenter/ConditionalDists.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/aicenter/ConditionalDists.jl)
 
 # ConditionalDists.jl

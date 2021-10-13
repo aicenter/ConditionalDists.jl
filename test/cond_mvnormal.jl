@@ -33,9 +33,6 @@
 
     disttypes(::Type{<:Vector}) = (TuringDiagMvNormal,ConditionalDists.BatchDiagMvNormal)
     disttypes(::Type{<:Real}) = (TuringScalMvNormal,ConditionalDists.BatchScalMvNormal)
-    σsize(::Type{<:Vector}) = (xlength,)
-    σsize(::Type{<:Real}) = ()
-
 
     for (name,mapping,T,nrps) in cases
         @testset "$name" begin
@@ -47,7 +44,7 @@
             σ2 = var(res)
             @test res isa Texample
             @test size(μ) == (xlength,)
-            @test size(σ2) == σsize(T)
+            @test size(σ2) == (xlength,)
 
             loss() = logpdf(p,x,z)
             ps = Flux.params(p)
