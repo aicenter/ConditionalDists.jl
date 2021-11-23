@@ -19,15 +19,15 @@
     @test all(var(d) .== σs .^2)
 
     llh = logpdf(d|>gpu, xs|>gpu) |> cpu
-    testds  = [MvNormal(m,s) for (m,s) in zip(eachcol(μs), eachcol(σs))]
+    testds  = [MvNormal(m,Diagonal(s)) for (m,s) in zip(eachcol(μs), eachcol(σs))]
     testllh = Float32.([logpdf(p,x) for (p,x) in zip(testds,eachcol(xs))])
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
-    f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ) |> gpu, x |> gpu))
-    @test_nowarn Flux.gradient(f, xs, μs, σs)
+    f1(x, μ, σ) = sum(logpdf(BatchMvNormal(μ, σ) |> gpu, x |> gpu))
+    @test_nowarn Flux.gradient(f1, xs, μs, σs)
 
-    f(μ, σ) = sum(rand(BatchMvNormal(μ,σ) |> gpu))
-    @test_nowarn Flux.gradient(f, μs, σs)
+    f1(μ, σ) = sum(rand(BatchMvNormal(μ,σ) |> gpu))
+    @test_nowarn Flux.gradient(f1, μs, σs)
 
     # BatchScalMvNormal
     μs = rand(Float32, xlen, batch)
@@ -40,10 +40,10 @@
     testllh = Float32.([logpdf(p,x) for (p,x) in zip(testds,eachcol(xs))])
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
-    f(x, μ, σ) = sum(logpdf(BatchMvNormal(μ|>gpu, σ|>gpu), x|>gpu))
-    @test_nowarn Flux.gradient(f, xs, μs, ss)
+    f3(x, μ, σ) = sum(logpdf(BatchMvNormal(μ|>gpu, σ|>gpu), x|>gpu))
+    @test_nowarn Flux.gradient(f3, xs, μs, ss)
 
-    f(μ, σ) = sum(rand(BatchMvNormal(μ,σ)|>gpu))
-    @test_nowarn Flux.gradient(f, μs, ss)
+    f4(μ, σ) = sum(rand(BatchMvNormal(μ,σ)|>gpu))
+    @test_nowarn Flux.gradient(f4, μs, ss)
 
 end

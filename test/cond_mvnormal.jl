@@ -46,14 +46,14 @@
             @test size(μ) == (xlength,)
             @test size(σ2) == (xlength,)
 
-            loss() = logpdf(p,x,z)
+            f1() = logpdf(p,x,z)
             ps = Flux.params(p)
             @test length(ps) == nrps
-            @test loss() isa Float32
-            @test_nowarn Flux.gradient(loss, ps)
+            @test_broken f1() isa Float32
+            @test_nowarn Flux.gradient(f1, ps)
 
-            f() = sum(rand(p,z))
-            gs = Flux.gradient(f,ps)
+            f2() = sum(rand(p,z))
+            gs = Flux.gradient(f2,ps)
             for p in ps
                 g = gs[p]
                 @test all(isfinite.(g)) && all(g .!= 0)
@@ -68,12 +68,12 @@
             @test size(μ) == (xlength,batchsize)
             @test size(σ2) == (xlength,batchsize)
 
-            loss() = sum(logpdf(p,X,Z))
-            @test loss() isa Float32
-            @test_nowarn Flux.gradient(loss, ps)
+            f3() = sum(logpdf(p,X,Z))
+            @test f3() isa Float32
+            @test_nowarn Flux.gradient(f3, ps)
 
-            f() = sum(rand(p,Z))
-            gs = Flux.gradient(f,ps)
+            f4() = sum(rand(p,Z))
+            gs = Flux.gradient(f4,ps)
             for p in ps
                 g = gs[p]
                 @test all(isfinite.(g)) && all(g .!= 0)

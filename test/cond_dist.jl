@@ -17,13 +17,13 @@
 
     x = rand(Float32, xlength) |> gpu
     z = rand(Float32, zlength) |> gpu
-    loss() = logpdf(p,x,z)
+    f1() = logpdf(p,x,z)
     ps = Flux.params(p)
-    @test_broken loss() isa Float32
-    @test_nowarn Flux.gradient(loss, ps)
+    @test_broken f1() isa Float32
+    @test_nowarn Flux.gradient(f1, ps)
 
-    f() = sum(rand(p,z))
-    @test_nowarn Flux.gradient(f, ps)
+    f2() = sum(rand(p,z))
+    @test_nowarn Flux.gradient(f2, ps)
 
     # Array of DiagMvNormal
     res = condition(p, rand(zlength,batchsize)|>gpu)
@@ -31,13 +31,13 @@
 
     x = rand(Float32, xlength, batchsize) |> gpu
     z = rand(Float32, zlength, batchsize) |> gpu
-    loss() = sum(logpdf(p,x,z))
+    f3() = sum(logpdf(p,x,z))
     ps = Flux.params(p)
     @test length(ps) == 4
-    @test_broken loss() isa Float32
-    @test_nowarn gs = Flux.gradient(loss, ps)
+    @test_broken f3() isa Float32
+    @test_nowarn gs = Flux.gradient(f3, ps)
 
-    f() = sum(rand(p,z))
-    @test_nowarn Flux.gradient(f, ps)
+    f5() = sum(rand(p,z))
+    @test_nowarn Flux.gradient(f5, ps)
 
 end
