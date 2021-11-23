@@ -19,7 +19,7 @@
     @test all(var(d) .== σs .^2)
 
     llh = logpdf(d|>gpu, xs|>gpu) |> cpu
-    testds  = [MvNormal(m,Diagonal(s)) for (m,s) in zip(eachcol(μs), eachcol(σs))]
+    testds  = [MvNormal(m,Diagonal(s .^2)) for (m,s) in zip(eachcol(μs), eachcol(σs))]
     testllh = Float32.([logpdf(p,x) for (p,x) in zip(testds,eachcol(xs))])
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
@@ -36,7 +36,7 @@
     d = BatchMvNormal(μs,ss)
 
     llh = logpdf(d|>gpu,xs|>gpu) |> cpu
-    testds  = [MvNormal(m,s) for (m,s) in zip(eachcol(μs),ss)]
+    testds  = [MvNormal(m,s^2*I) for (m,s) in zip(eachcol(μs),ss)]
     testllh = Float32.([logpdf(p,x) for (p,x) in zip(testds,eachcol(xs))])
     @test all(isapprox.(llh, testllh, rtol=rtol, atol=atol))
 
